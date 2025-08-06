@@ -322,8 +322,8 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingBottom: Platform.select({
-      ios: 170, // 88px tab bar + 82px spacing
-      default: 150, // 70px tab bar + 80px spacing
+      ios: 165, // 85px tab bar + 80px spacing
+      default: 145, // 65px tab bar + 80px spacing
     }),
   },
   header: {
@@ -527,8 +527,8 @@ const styles = StyleSheet.create({
   fabContainer: {
     position: 'absolute',
     bottom: Platform.select({
-      ios: 108, // 88px tab bar + 20px spacing
-      default: 90, // 70px tab bar + 20px spacing
+      ios: 105, // 85px tab bar + 20px spacing
+      default: 85, // 65px tab bar + 20px spacing
     }),
     right: 20,
   },
