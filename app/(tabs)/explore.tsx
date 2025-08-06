@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -82,12 +82,12 @@ export default function ExploreScreen() {
       mapRef.current.animateToRegion({
         latitude: location.latitude,
         longitude: location.longitude,
-        latitudeDelta: 0.015,
-        longitudeDelta: 0.015,
+    latitudeDelta: 0.015,
+    longitudeDelta: 0.015,
       }, 1000);
     }
   }, [location]);
-  
+
   const filteredSpots = mockParkingSpots.filter(spot => {
     if (selectedFilter === 'all') return true;
     return spot.type === selectedFilter;
@@ -113,11 +113,11 @@ export default function ExploreScreen() {
 
     // Mostrar el alert después del scroll y zoom
     setTimeout(() => {
-      Alert.alert(
-        'Plaza de aparcamiento',
-        `${spot.address}\n${spot.price}\nDisponible: ${spot.timeLeft}\nDistancia: ${spot.distance}`,
-        [
-          { text: 'Cancelar', style: 'cancel' },
+    Alert.alert(
+        '🅿️ Plaza de aparcamiento',
+        `📍 ${spot.address}\n💰 ${spot.price}\n⏱️ Disponible: ${spot.timeLeft}\n📏 Distancia: ${spot.distance}`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
           { 
             text: 'Ver en mapa', 
             onPress: () => {
@@ -133,8 +133,9 @@ export default function ExploreScreen() {
             }
           },
           { 
-            text: 'Reservar', 
-            onPress: () => Alert.alert('Reservado', `Plaza en ${spot.address} reservada`) 
+            text: '🚗 Reservar', 
+            onPress: () => handleReservation(spot),
+            style: 'default'
           }
         ]
       );
@@ -179,13 +180,43 @@ export default function ExploreScreen() {
 
     // Mostrar información del spot sin mover el mapa de nuevo
     Alert.alert(
-      'Plaza de aparcamiento',
-      `${spot.address}\n${spot.price}\nDisponible: ${spot.timeLeft}\nDistancia: ${spot.distance}`,
+      '🅿️ Plaza de aparcamiento',
+      `📍 ${spot.address}\n💰 ${spot.price}\n⏱️ Disponible: ${spot.timeLeft}\n📏 Distancia: ${spot.distance}`,
       [
         { text: 'Cancelar', style: 'cancel' },
         { 
-          text: 'Reservar', 
-          onPress: () => Alert.alert('Reservado', `Plaza en ${spot.address} reservada`) 
+          text: '🚗 Reservar', 
+          onPress: () => handleReservation(spot)
+        }
+      ]
+    );
+  };
+
+  const handleReservation = (spot: ParkingSpot) => {
+    Alert.alert(
+      '🎯 Confirmar Reserva',
+      `¿Quieres reservar esta plaza de aparcamiento?\n\n📍 ${spot.address}\n💰 ${spot.price}\n⏱️ Disponible: ${spot.timeLeft}`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: '✅ Confirmar Reserva',
+          onPress: () => {
+            // Mostrar confirmación de reserva exitosa
+            Alert.alert(
+              '🎉 ¡Reserva confirmada!',
+              `Tu plaza ha sido reservada exitosamente:\n\n📍 ${spot.address}\n💰 ${spot.price}\n\n¿Te gustaría navegar hasta la ubicación?`,
+              [
+                { text: 'Más tarde', style: 'cancel' },
+                {
+                  text: '🧭 Navegar ahora',
+                  onPress: () => {
+                    console.log('🚗 Iniciando navegación a:', spot.address);
+                    openNativeNavigation(spot.latitude, spot.longitude, spot.address);
+                  }
+                }
+              ]
+            );
+          }
         }
       ]
     );
@@ -207,31 +238,31 @@ export default function ExploreScreen() {
             </View>
             <ThemedText style={[styles.appName, { color: colors.text }]} type="defaultSemiBold">
               Explorar Plazas
-            </ThemedText>
-          </View>
-        </View>
+                </ThemedText>
+              </View>
+      </View>
 
         {/* Search Bar */}
         <View style={styles.searchSection}>
-          <TouchableOpacity 
+        <TouchableOpacity
             style={[styles.searchContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}
             onPress={handleSearchPress}
           >
             <IconSymbol name="magnifyingglass" size={20} color={colors.text} />
             <ThemedText style={[styles.searchPlaceholder, { color: colors.text }]}>
               ¿Dónde buscas aparcar?
-            </ThemedText>
-          </TouchableOpacity>
+          </ThemedText>
+        </TouchableOpacity>
 
           {/* Quick Filters */}
           <View style={styles.quickFilters}>
-            <TouchableOpacity
-              style={[
+        <TouchableOpacity
+          style={[
                 styles.quickFilter,
                 { backgroundColor: selectedFilter === 'available' ? colors.primary : colors.surface }
-              ]}
-              onPress={() => setSelectedFilter('available')}
-            >
+          ]}
+          onPress={() => setSelectedFilter('available')}
+        >
               <IconSymbol 
                 name="checkmark.circle.fill" 
                 size={16} 
@@ -243,12 +274,12 @@ export default function ExploreScreen() {
                   { color: selectedFilter === 'available' ? colors.accent : colors.text }
                 ]}
               >
-                Disponibles
-              </ThemedText>
-            </TouchableOpacity>
+            Disponibles
+          </ThemedText>
+        </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[
+        <TouchableOpacity
+          style={[
                 styles.quickFilter,
                 { backgroundColor: selectedFilter === 'all' ? colors.primary : colors.surface }
               ]}
@@ -266,8 +297,8 @@ export default function ExploreScreen() {
                 ]}
               >
                 Todas
-              </ThemedText>
-            </TouchableOpacity>
+          </ThemedText>
+        </TouchableOpacity>
 
             <TouchableOpacity
               style={[styles.viewToggle, { backgroundColor: colors.surface }]}
@@ -280,7 +311,7 @@ export default function ExploreScreen() {
               />
             </TouchableOpacity>
           </View>
-        </View>
+      </View>
 
         {/* Map Section */}
         {mapView && (
@@ -291,7 +322,7 @@ export default function ExploreScreen() {
                   <ActivityIndicator size="large" color={colors.primary} />
                   <ThemedText style={[styles.mapText, { color: colors.text }]} type="defaultSemiBold">
                     📍 Obteniendo tu ubicación...
-                  </ThemedText>
+        </ThemedText>
                   <ThemedText style={[styles.mapSubtext, { color: colors.text }]}>
                     Asegúrate de permitir el acceso al GPS
                   </ThemedText>
@@ -416,18 +447,18 @@ export default function ExploreScreen() {
 
           {/* Parking Spots List */}
           <View style={styles.spotsList}>
-            {filteredSpots.map((spot) => (
-              <TouchableOpacity
-                key={spot.id}
-                style={[styles.spotCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
-                onPress={() => handleSpotPress(spot)}
-              >
+        {filteredSpots.map((spot) => (
+          <TouchableOpacity
+            key={spot.id}
+            style={[styles.spotCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+            onPress={() => handleSpotPress(spot)}
+          >
                 <View style={styles.spotContent}>
-                  <View style={styles.spotInfo}>
+              <View style={styles.spotInfo}>
                     <View style={styles.spotHeader}>
-                      <ThemedText style={[styles.spotAddress, { color: colors.text }]} type="defaultSemiBold">
-                        {spot.address}
-                      </ThemedText>
+                <ThemedText style={[styles.spotAddress, { color: colors.text }]} type="defaultSemiBold">
+                  {spot.address}
+                </ThemedText>
                       <View style={[
                         styles.statusIndicator,
                         { backgroundColor: getStatusColor(spot.type, colors) }
@@ -439,29 +470,29 @@ export default function ExploreScreen() {
                         <IconSymbol name="location.fill" size={14} color={colors.text} />
                         <ThemedText style={[styles.detailText, { color: colors.text }]}>
                           {spot.distance}
-                        </ThemedText>
-                      </View>
-                      
+                  </ThemedText>
+              </View>
+              
                       <View style={styles.spotDetail}>
                         <IconSymbol name="clock.fill" size={14} color={colors.text} />
                         <ThemedText style={[styles.detailText, { color: colors.text }]}>
                           {spot.timeLeft}
-                        </ThemedText>
+                </ThemedText>
                       </View>
-                    </View>
-                  </View>
-                  
+              </View>
+            </View>
+            
                   <View style={styles.spotPrice}>
                     <ThemedText style={[styles.priceText, { color: colors.primary }]} type="defaultSemiBold">
                       {spot.price}
                     </ThemedText>
                     <ThemedText style={[styles.priceSubtext, { color: colors.text }]}>
                       {getStatusText(spot.type)}
-                    </ThemedText>
+              </ThemedText>
                   </View>
-                </View>
-              </TouchableOpacity>
-            ))}
+            </View>
+          </TouchableOpacity>
+        ))}
           </View>
         </View>
       </ScrollView>
@@ -742,6 +773,84 @@ function getDarkMapStyle() {
       ]
     }
   ];
+}
+
+// Navigation to native maps
+async function openNativeNavigation(latitude: number, longitude: number, address: string) {
+  const destination = `${latitude},${longitude}`;
+  const encodedAddress = encodeURIComponent(address);
+  
+  try {
+    if (Platform.OS === 'ios') {
+      // Try Apple Maps first (native iOS)
+      const appleMapsUrl = `maps://maps.apple.com/?q=${encodedAddress}&ll=${destination}`;
+      const canOpenAppleMaps = await Linking.canOpenURL(appleMapsUrl);
+      
+      if (canOpenAppleMaps) {
+        await Linking.openURL(appleMapsUrl);
+        return;
+      }
+      
+      // Fallback to Google Maps web
+      const googleMapsWebUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`;
+      await Linking.openURL(googleMapsWebUrl);
+      
+    } else {
+      // Android - Show options between Google Maps and Waze
+      Alert.alert(
+        '🗺️ Navegación',
+        'Elige tu aplicación de mapas preferida:',
+        [
+          { 
+            text: 'Google Maps', 
+            onPress: async () => {
+              try {
+                // Try Google Maps app first
+                const googleMapsAppUrl = `google.navigation:q=${destination}`;
+                const canOpenGoogleMaps = await Linking.canOpenURL(googleMapsAppUrl);
+                
+                if (canOpenGoogleMaps) {
+                  await Linking.openURL(googleMapsAppUrl);
+                } else {
+                  // Fallback to Google Maps web
+                  const googleMapsWebUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`;
+                  await Linking.openURL(googleMapsWebUrl);
+                }
+              } catch (error) {
+                console.error('Error opening Google Maps:', error);
+                Alert.alert('Error', 'No se pudo abrir Google Maps');
+              }
+            }
+          },
+          { 
+            text: 'Waze', 
+            onPress: async () => {
+              try {
+                // Try Waze app
+                const wazeUrl = `waze://?ll=${destination}&navigate=yes`;
+                const canOpenWaze = await Linking.canOpenURL(wazeUrl);
+                
+                if (canOpenWaze) {
+                  await Linking.openURL(wazeUrl);
+                } else {
+                  // Fallback to Waze web
+                  const wazeWebUrl = `https://waze.com/ul?ll=${destination}&navigate=yes`;
+                  await Linking.openURL(wazeWebUrl);
+                }
+              } catch (error) {
+                console.error('Error opening Waze:', error);
+                Alert.alert('Error', 'No se pudo abrir Waze. ¿Está instalado?');
+              }
+            }
+          },
+          { text: 'Cancelar', style: 'cancel' }
+        ]
+      );
+    }
+  } catch (error) {
+    console.error('Error opening navigation:', error);
+    Alert.alert('Error', 'No se pudo abrir la aplicación de mapas');
+  }
 }
 
 
