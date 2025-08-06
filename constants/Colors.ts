@@ -1,26 +1,48 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
+ * ReservPark Color Palette
+ * Modern and elegant colors for the parking reservation app
  */
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+// Brand Colors
+const brandTeal = '#3A7A6B';      // Primary teal/green
+const brandGreen = '#6CB89A';     // Secondary green
+const brandBeige = '#F0DBA8';     // Accent beige/gold
+const brandDark = '#1B3A3F';      // Dark background
+
+const tintColorLight = brandTeal;
+const tintColorDark = brandBeige;
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
+    text: '#1B3A3F',
+    background: '#FFFFFF',
     tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
+    icon: '#6CB89A',
+    tabIconDefault: '#8A9BA8',
     tabIconSelected: tintColorLight,
+    primary: brandTeal,
+    secondary: brandGreen,
+    accent: brandBeige,
+    surface: '#F8F9FA',
+    border: '#E2E8F0',
+    success: '#10B981',
+    warning: '#F59E0B',
+    error: '#EF4444',
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
+    text: '#F0DBA8',
+    background: brandDark,
     tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
+    icon: '#6CB89A',
+    tabIconDefault: '#8A9BA8',
     tabIconSelected: tintColorDark,
+    primary: brandGreen,
+    secondary: brandTeal,
+    accent: brandBeige,
+    surface: '#2D4A50',
+    border: '#3A5A62',
+    success: '#10B981',
+    warning: '#F59E0B',
+    error: '#EF4444',
   },
 };
