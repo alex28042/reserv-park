@@ -1,13 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Linking, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Platform, ScrollView, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ReservationModal } from '@/components/ReservationModal';
 import { ThemedText } from '@/components/ThemedText';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useLocation } from '@/hooks/useLocation';
+import { exploreStyles as styles } from './explore.styles';
 
 interface ParkingSpot {
   id: string;
@@ -68,6 +70,8 @@ export default function ExploreScreen() {
   const colors = Colors[colorScheme ?? 'light'];
   const [selectedFilter, setSelectedFilter] = useState<'available' | 'all'>('available');
   const [mapView, setMapView] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
   const mapRef = useRef<MapView>(null);
   const scrollRef = useRef<any>(null);
   
@@ -97,9 +101,9 @@ export default function ExploreScreen() {
     try {
       return mockParkingSpots.filter(spot => {
         if (!spot || typeof spot !== 'object') return false;
-        if (selectedFilter === 'all') return true;
-        return spot.type === selectedFilter;
-      });
+    if (selectedFilter === 'all') return true;
+    return spot.type === selectedFilter;
+  });
     } catch (error) {
       console.error('🚨 Error filtrando spots:', error);
       return [];
@@ -206,33 +210,18 @@ export default function ExploreScreen() {
   };
 
   const handleReservation = (spot: ParkingSpot) => {
-    Alert.alert(
-      '🎯 Confirmar Reserva',
-      `¿Quieres reservar esta plaza de aparcamiento?\n\n📍 ${spot.address}\n💰 ${spot.price}\n⏱️ Disponible: ${spot.timeLeft}`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: '✅ Confirmar Reserva',
-          onPress: () => {
-            // Mostrar confirmación de reserva exitosa
-            Alert.alert(
-              '🎉 ¡Reserva confirmada!',
-              `Tu plaza ha sido reservada exitosamente:\n\n📍 ${spot.address}\n💰 ${spot.price}\n\n¿Te gustaría navegar hasta la ubicación?`,
-              [
-                { text: 'Más tarde', style: 'cancel' },
-                {
-                  text: '🧭 Navegar ahora',
-                  onPress: () => {
-                    console.log('🚗 Iniciando navegación a:', spot.address);
-                    openNativeNavigation(spot.latitude, spot.longitude, spot.address);
-                  }
-                }
-              ]
-            );
-          }
-        }
-      ]
-    );
+    setSelectedSpot(spot);
+    setModalVisible(true);
+  };
+
+  const handleModalClose = () => {
+    setModalVisible(false);
+    setSelectedSpot(null);
+  };
+
+  const handleNavigation = (latitude: number, longitude: number, address: string) => {
+    console.log('🚗 Iniciando navegación a:', address);
+    openNativeNavigation(latitude, longitude, address);
   };
 
   return (
@@ -322,7 +311,7 @@ export default function ExploreScreen() {
                 size={16} 
                 color={colors.primary} 
               />
-            </TouchableOpacity>
+        </TouchableOpacity>
           </View>
       </View>
 
@@ -490,19 +479,19 @@ export default function ExploreScreen() {
                         <IconSymbol name="clock.fill" size={14} color={colors.text} />
                         <ThemedText style={[styles.detailText, { color: colors.text }]}>
                           {spot.timeLeft}
-                </ThemedText>
+                  </ThemedText>
                       </View>
+                </View>
               </View>
-            </View>
-            
+              
                   <View style={styles.spotPrice}>
                     <ThemedText style={[styles.priceText, { color: colors.primary }]} type="defaultSemiBold">
                       {spot.price}
                     </ThemedText>
                     <ThemedText style={[styles.priceSubtext, { color: colors.text }]}>
-                      {getStatusText(spot.type)}
-              </ThemedText>
-                  </View>
+                  {getStatusText(spot.type)}
+                </ThemedText>
+              </View>
             </View>
           </TouchableOpacity>
             )) : (
@@ -513,12 +502,20 @@ export default function ExploreScreen() {
                 </ThemedText>
                 <ThemedText style={[styles.emptySubtext, { color: colors.text }]}>
                   Intenta cambiar el filtro o buscar en otra ubicación
-                </ThemedText>
-              </View>
+              </ThemedText>
+            </View>
             )}
           </View>
         </View>
       </ScrollView>
+      
+      {/* Reservation Modal */}
+      <ReservationModal
+        visible={modalVisible}
+        spot={selectedSpot}
+        onClose={handleModalClose}
+        onNavigate={handleNavigation}
+      />
     </SafeAreaView>
   );
 }
@@ -893,287 +890,3 @@ async function openNativeNavigation(latitude: number, longitude: number, address
 
 
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: Platform.select({
-      ios: 105, // 85px tab bar + 20px spacing
-      default: 85, // 65px tab bar + 20px spacing
-    }),
-  },
-  // Header styles
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 15,
-  },
-  headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  logoSmall: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  appName: {
-    fontSize: 20,
-    fontWeight: '600',
-  },
-  // Search section
-  searchSection: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    marginBottom: 16,
-    gap: 12,
-  },
-  searchPlaceholder: {
-    fontSize: 16,
-    flex: 1,
-  },
-  quickFilters: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  quickFilter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    gap: 6,
-  },
-  quickFilterText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  viewToggle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 'auto',
-  },
-  // Map section
-  mapSection: {
-    marginHorizontal: 20,
-    marginBottom: 20,
-    position: 'relative',
-  },
-  mapContainer: {
-    height: 350,
-    borderRadius: 16,
-    overflow: 'hidden',
-    backgroundColor: '#f0f0f0',
-  },
-  map: {
-    width: '100%',
-    height: '100%',
-  },
-  mapPlaceholder: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  mapText: {
-    fontSize: 16,
-    marginTop: 12,
-    textAlign: 'center',
-  },
-  mapSubtext: {
-    fontSize: 14,
-    marginTop: 8,
-    textAlign: 'center',
-    opacity: 0.7,
-  },
-  retryButton: {
-    marginTop: 16,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-  },
-  retryText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  mapControls: {
-    position: 'absolute',
-    bottom: 16,
-    right: 16,
-  },
-  mapControl: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  // Custom marker styles
-  customMarker: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 3,
-    borderColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  markerText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  // User marker styles
-  userMarker: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 4,
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  userMarkerInner: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  // Empty state
-  emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 40,
-    paddingHorizontal: 20,
-  },
-  emptyText: {
-    marginTop: 16,
-    fontSize: 18,
-    textAlign: 'center',
-  },
-  emptySubtext: {
-    marginTop: 8,
-    fontSize: 14,
-    textAlign: 'center',
-    opacity: 0.7,
-  },
-  // Results section
-  resultsSection: {
-    paddingHorizontal: 20,
-  },
-  resultsHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  resultsTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  spotsList: {
-    gap: 12,
-  },
-  spotCard: {
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  spotContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  spotInfo: {
-    flex: 1,
-    marginRight: 16,
-  },
-  spotHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  spotAddress: {
-    fontSize: 16,
-    flex: 1,
-  },
-  statusIndicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  spotDetails: {
-    flexDirection: 'row',
-    gap: 16,
-  },
-  spotDetail: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  detailText: {
-    fontSize: 14,
-    opacity: 0.7,
-  },
-  spotPrice: {
-    alignItems: 'flex-end',
-  },
-  priceText: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  priceSubtext: {
-    fontSize: 12,
-    opacity: 0.7,
-    marginTop: 2,
-  },
-});

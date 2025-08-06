@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { Alert, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
 import { ThemedText } from '@/components/ThemedText';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { router } from 'expo-router';
+import React, { useState } from 'react';
+import { Alert, ScrollView, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { indexStyles as styles } from './index.styles';
 
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
@@ -13,11 +14,23 @@ export default function HomeScreen() {
   const [activeTab, setActiveTab] = useState('buscar');
 
   const handleFeaturePress = (feature: string) => {
+    // Navegación específica para búsqueda y ubicaciones
+    if (feature === 'Búsqueda' || feature === 'Buscar plaza' || feature === 'Reservar' || feature === 'Explorar zona') {
+      router.push('/(tabs)/explore');
+      return;
+    }
+    
+    // Para otras funcionalidades, mostrar mensaje de desarrollo
     Alert.alert(
       'Funcionalidad en desarrollo',
       `La función "${feature}" estará disponible próximamente.`,
       [{ text: 'OK' }]
     );
+  };
+
+  const handleLocationPress = (location: string) => {
+    // Navegar a explore cuando se toque una ubicación favorita
+    router.push('/(tabs)/explore');
   };
 
   return (
@@ -27,147 +40,251 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Simple Header */}
+        {/* Enhanced Header */}
         <View style={[styles.header, { backgroundColor: colors.background }]}>
           <View style={styles.headerContent}>
-            <View style={[styles.logoSmall, { backgroundColor: colors.primary }]}>
-              <IconSymbol name="car.fill" size={20} color={colors.accent} />
+            <View style={styles.logoSection}>
+              <View style={[styles.logoSmall, { backgroundColor: colors.primary }]}>
+                <IconSymbol name="car.fill" size={22} color={colors.accent} />
+              </View>
+              <ThemedText style={[styles.appName, { color: colors.text }]} type="title">
+                ReservPark
+              </ThemedText>
             </View>
-            <ThemedText style={[styles.appName, { color: colors.text }]} type="defaultSemiBold">
-              ReservPark
-            </ThemedText>
+            <View style={styles.headerActions}>
+              <TouchableOpacity 
+                style={[styles.headerButton, { backgroundColor: colors.surface }]}
+                onPress={() => handleFeaturePress('Notificaciones')}
+              >
+                <IconSymbol name="bell.fill" size={18} color={colors.text} />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.headerButton, { backgroundColor: colors.surface }]}
+                onPress={() => handleFeaturePress('Perfil')}
+              >
+                <IconSymbol name="person.crop.circle.fill" size={18} color={colors.primary} />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
-        {/* Tab Selector */}
-        <View style={[styles.tabContainer, { backgroundColor: colors.surface }]}>
-          <TouchableOpacity 
-            style={[styles.tab, activeTab === 'buscar' && { backgroundColor: colors.primary }]}
-            onPress={() => setActiveTab('buscar')}
-          >
-            <IconSymbol 
-              name="magnifyingglass" 
-              size={18} 
-              color={activeTab === 'buscar' ? colors.accent : colors.text} 
-            />
-            <ThemedText 
-              style={[
-                styles.tabText, 
-                { color: activeTab === 'buscar' ? colors.accent : colors.text }
-              ]}
-              type="defaultSemiBold"
-            >
-              Buscar
-            </ThemedText>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[styles.tab, activeTab === 'ofrecer' && { backgroundColor: colors.primary }]}
-            onPress={() => setActiveTab('ofrecer')}
-          >
-            <IconSymbol 
-              name="megaphone.fill" 
-              size={18} 
-              color={activeTab === 'ofrecer' ? colors.accent : colors.text} 
-            />
-            <ThemedText 
-              style={[
-                styles.tabText, 
-                { color: activeTab === 'ofrecer' ? colors.accent : colors.text }
-              ]}
-              type="defaultSemiBold"
-            >
-              Ofrecer
-            </ThemedText>
-          </TouchableOpacity>
-        </View>
+        <View style={styles.contentContainer}>
+          {/* Enhanced Tab Selector */}
+          <View style={styles.tabSection}>
+            <View style={[styles.tabContainer, { backgroundColor: colors.surface }]}>
+              <TouchableOpacity 
+                style={[styles.tab, activeTab === 'buscar' && { backgroundColor: colors.primary }]}
+                onPress={() => setActiveTab('buscar')}
+              >
+                <IconSymbol 
+                  name="magnifyingglass" 
+                  size={20} 
+                  color={activeTab === 'buscar' ? colors.accent : colors.text} 
+                />
+                <ThemedText 
+                  style={[
+                    styles.tabText, 
+                    { color: activeTab === 'buscar' ? colors.accent : colors.text }
+                  ]}
+                >
+                  Buscar
+                </ThemedText>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.tab, activeTab === 'ofrecer' && { backgroundColor: colors.primary }]}
+                onPress={() => setActiveTab('ofrecer')}
+              >
+                <IconSymbol 
+                  name="megaphone.fill" 
+                  size={20} 
+                  color={activeTab === 'ofrecer' ? colors.accent : colors.text} 
+                />
+                <ThemedText 
+                  style={[
+                    styles.tabText, 
+                    { color: activeTab === 'ofrecer' ? colors.accent : colors.text }
+                  ]}
+                >
+                  Ofrecer
+                </ThemedText>
+              </TouchableOpacity>
+            </View>
+          </View>
 
-        <View style={styles.content}>
-          {/* Search Input */}
-          <TouchableOpacity 
-            style={[styles.searchContainer, { backgroundColor: colors.background, borderColor: colors.primary }]}
-            onPress={() => handleFeaturePress('Búsqueda')}
-          >
-            <IconSymbol name="magnifyingglass" size={20} color={colors.primary} />
-            <ThemedText style={[styles.searchPlaceholder, { color: colors.text }]}>
-              {activeTab === 'buscar' ? '¿Dónde quieres aparcar?' : '¿Dónde dejas tu plaza?'}
-            </ThemedText>
-          </TouchableOpacity>
+          {/* Enhanced Search */}
+          <View style={styles.searchSection}>
+            <TouchableOpacity 
+              style={[styles.searchContainer, { backgroundColor: colors.background, borderColor: colors.border }]}
+              onPress={() => handleFeaturePress('Búsqueda')}
+            >
+              <IconSymbol name="magnifyingglass" size={22} color={colors.primary} />
+              <ThemedText style={[styles.searchPlaceholder, { color: colors.text }]}>
+                {activeTab === 'buscar' ? '¿Dónde quieres aparcar?' : '¿Dónde dejas tu plaza?'}
+              </ThemedText>
+              <IconSymbol name="arrow.right" size={16} color={colors.text} style={{ opacity: 0.4 }} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Stats Section */}
+          <View style={styles.statsSection}>
+            <View style={[styles.statsContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <View style={styles.statItem}>
+                <ThemedText style={[styles.statNumber, { color: colors.primary }]} type="title">
+                  127
+                </ThemedText>
+                <ThemedText style={[styles.statLabel, { color: colors.text }]}>
+                  Plazas cerca
+                </ThemedText>
+              </View>
+              <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
+              <View style={styles.statItem}>
+                <ThemedText style={[styles.statNumber, { color: colors.success }]} type="title">
+                  89
+                </ThemedText>
+                <ThemedText style={[styles.statLabel, { color: colors.text }]}>
+                  Disponibles
+                </ThemedText>
+              </View>
+              <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
+              <View style={styles.statItem}>
+                <ThemedText style={[styles.statNumber, { color: colors.warning }]} type="title">
+                  €2.50
+                </ThemedText>
+                <ThemedText style={[styles.statLabel, { color: colors.text }]}>
+                  Precio promedio
+                </ThemedText>
+              </View>
+            </View>
+          </View>
 
           {/* Saved Locations */}
-          <View style={styles.savedLocations}>
-            <SavedLocationItem 
-              title="Trabajo"
-              address="Calle Mayor 123"
-              isWork={true}
-              onPress={() => handleFeaturePress('Trabajo')}
-            />
-            <SavedLocationItem 
-              title="Casa"
-              address="Avenida Principal 456"
-              isWork={false}
-              onPress={() => handleFeaturePress('Casa')}
-            />
-          </View>
-
-          {/* Suggestions */}
-          <View style={styles.suggestionsSection}>
-            <View style={styles.sectionHeaderRow}>
-              <ThemedText style={[styles.sectionTitle, { color: colors.text }]} type="defaultSemiBold">
-                Sugerencias
+          <View style={styles.savedLocationsSection}>
+            <View style={styles.sectionHeader}>
+              <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>
+                Ubicaciones Favoritas
               </ThemedText>
-              <TouchableOpacity onPress={() => handleFeaturePress('Ver todo')}>
+              <TouchableOpacity 
+                style={[styles.seeAllButton, { backgroundColor: colors.surface }]}
+                onPress={() => handleLocationPress('Ver todas')}
+              >
                 <ThemedText style={[styles.seeAllText, { color: colors.primary }]}>
-                  Ver todo
+                  Ver todas
                 </ThemedText>
               </TouchableOpacity>
             </View>
             
-            <View style={styles.suggestionsGrid}>
-              <SuggestionCard 
-                title="Buscar"
-                type="search"
-                onPress={() => handleFeaturePress('Buscar plaza')}
+            <View style={styles.savedLocations}>
+              <SavedLocationItem 
+                title="Oficina"
+                address="Calle Gran Vía, 123"
+                isWork={true}
+                colors={colors}
+                onPress={() => handleLocationPress('Oficina')}
               />
-              <SuggestionCard 
-                title="Anunciar"
-                type="announce"
-                onPress={() => handleFeaturePress('Anunciar plaza')}
-              />
-              <SuggestionCard 
-                title="Reservar"
-                type="reserve"
-                onPress={() => handleFeaturePress('Reservar')}
-              />
-              <SuggestionCard 
-                title="Pagar"
-                type="pay"
-                onPress={() => handleFeaturePress('Pagar')}
+              <SavedLocationItem 
+                title="Casa"
+                address="Avenida de la Paz, 456"
+                isWork={false}
+                colors={colors}
+                onPress={() => handleLocationPress('Casa')}
               />
             </View>
           </View>
 
-          {/* Ways to plan section */}
-          <View style={styles.planningSection}>
-            <ThemedText style={[styles.sectionTitle, { color: colors.text }]} type="defaultSemiBold">
-              Formas de aparcar con ReservPark
-            </ThemedText>
+          {/* Quick Actions */}
+          <View style={styles.quickActionsSection}>
+            <View style={styles.sectionHeader}>
+              <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>
+                Acciones Rápidas
+              </ThemedText>
+            </View>
             
-            <View style={styles.planningCards}>
-              <PlanningCard 
-                title="Reserva una plaza"
-                description="Encuentra y reserva tu plaza ideal antes de llegar"
+            <View style={styles.quickActionsGrid}>
+              <QuickActionCard 
+                title="Buscar"
+                subtitle="Encuentra plazas"
+                icon="magnifyingglass"
+                colors={colors}
+                onPress={() => handleFeaturePress('Buscar plaza')}
+              />
+              <QuickActionCard 
+                title="Reservar"
+                subtitle="Asegura tu plaza"
+                icon="calendar.badge.plus"
+                colors={colors}
+                onPress={() => handleFeaturePress('Reservar')}
+              />
+              <QuickActionCard 
+                title="Compartir"
+                subtitle="Ofrece tu plaza"
+                icon="megaphone.fill"
+                colors={colors}
+                onPress={() => handleFeaturePress('Compartir plaza')}
+              />
+            </View>
+          </View>
+
+          {/* Featured Services */}
+          <View style={styles.featuresSection}>
+            <View style={styles.sectionHeader}>
+              <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>
+                Descubre ReservPark
+              </ThemedText>
+            </View>
+            
+            <View style={styles.featuresList}>
+              <FeatureCard 
+                title="Reserva Inteligente"
+                description="Encuentra y reserva la plaza perfecta con nuestro algoritmo de búsqueda avanzado que considera ubicación, precio y disponibilidad."
+                icon="brain.head.profile"
                 backgroundColor={colors.primary}
                 textColor={colors.accent}
-                onPress={() => handleFeaturePress('Reservar plaza')}
+                actionText="Comenzar"
+                onPress={() => handleFeaturePress('Reserva inteligente')}
               />
               
-              <PlanningCard 
-                title="Explora tu zona"
-                description="Descubre plazas disponibles cerca de ti en tiempo real"
+              <FeatureCard 
+                title="Comunidad Local"
+                description="Conecta con vecinos de tu zona para compartir plazas de aparcamiento y crear una red de estacionamiento colaborativo."
+                icon="person.3.fill"
                 backgroundColor={colors.secondary}
                 textColor={colors.background}
-                onPress={() => handleFeaturePress('Explorar zona')}
+                actionText="Unirse"
+                onPress={() => handleFeaturePress('Comunidad')}
+              />
+            </View>
+          </View>
+
+          {/* Recent Activity */}
+          <View style={styles.recentSection}>
+            <View style={styles.sectionHeader}>
+              <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>
+                Actividad Reciente
+              </ThemedText>
+            </View>
+            
+            <View style={styles.recentList}>
+              <RecentItem 
+                title="Plaza reservada en Gran Vía"
+                time="Hace 2 horas"
+                icon="checkmark.circle.fill"
+                iconColor={colors.success}
+                colors={colors}
+              />
+              <RecentItem 
+                title="Búsqueda guardada en Centro"
+                time="Ayer"
+                icon="magnifyingglass.circle.fill"
+                iconColor={colors.primary}
+                colors={colors}
+              />
+              <RecentItem 
+                title="Plaza compartida en Serrano"
+                time="Hace 3 días"
+                icon="megaphone.fill"
+                iconColor={colors.warning}
+                colors={colors}
               />
             </View>
           </View>
@@ -183,254 +300,137 @@ interface SavedLocationItemProps {
   address: string;
   onPress: () => void;
   isWork?: boolean;
+  colors: any;
 }
 
-interface SuggestionCardProps {
+interface QuickActionCardProps {
   title: string;
+  subtitle: string;
+  icon: string;
   onPress: () => void;
-  type: 'search' | 'announce' | 'reserve' | 'pay';
+  colors: any;
 }
 
-interface PlanningCardProps {
+interface FeatureCardProps {
   title: string;
   description: string;
+  icon: string;
   backgroundColor: string;
   textColor: string;
+  actionText: string;
   onPress: () => void;
 }
 
-// Saved Location Item Component
-function SavedLocationItem({ title, address, onPress, isWork = false }: SavedLocationItemProps) {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
+interface RecentItemProps {
+  title: string;
+  time: string;
+  icon: string;
+  iconColor: string;
+  colors: any;
+}
 
+// Enhanced Saved Location Item Component
+function SavedLocationItem({ title, address, onPress, isWork = false, colors }: SavedLocationItemProps) {
   return (
-    <TouchableOpacity style={styles.savedLocationItem} onPress={onPress}>
-      <View style={[styles.savedLocationIcon, { backgroundColor: colors.surface }]}>
-        <IconSymbol name={isWork ? 'building.2.fill' : 'house.fill'} size={16} color={colors.text} />
+    <TouchableOpacity 
+      style={[styles.savedLocationItem, { backgroundColor: colors.surface, borderColor: colors.border }]} 
+      onPress={onPress}
+    >
+      <View style={[styles.savedLocationIcon, { backgroundColor: colors.primary }]}>
+        <IconSymbol 
+          name={isWork ? 'building.2.fill' : 'house.fill'} 
+          size={20} 
+          color={colors.accent} 
+        />
       </View>
       <View style={styles.savedLocationContent}>
         <ThemedText style={[styles.savedLocationTitle, { color: colors.text }]} type="defaultSemiBold">
           {title}
         </ThemedText>
-        <ThemedText style={[styles.savedLocationAddress, { color: colors.text }]} type="default">
+        <ThemedText style={[styles.savedLocationAddress, { color: colors.text }]}>
           {address}
+        </ThemedText>
+      </View>
+      <IconSymbol 
+        name="chevron.right" 
+        size={16} 
+        color={colors.text} 
+        style={styles.savedLocationChevron}
+      />
+    </TouchableOpacity>
+  );
+}
+
+// Quick Action Card Component
+function QuickActionCard({ title, subtitle, icon, onPress, colors }: QuickActionCardProps) {
+  return (
+    <TouchableOpacity 
+      style={[styles.quickActionCard, { backgroundColor: colors.surface, borderColor: colors.border }]} 
+      onPress={onPress}
+    >
+      <View style={[styles.quickActionIcon, { backgroundColor: colors.primary }]}>
+        <IconSymbol name={icon} size={28} color={colors.accent} />
+      </View>
+      <ThemedText style={[styles.quickActionTitle, { color: colors.text }]} type="defaultSemiBold">
+        {title}
+      </ThemedText>
+      <ThemedText style={[styles.quickActionSubtitle, { color: colors.text }]}>
+        {subtitle}
+      </ThemedText>
+    </TouchableOpacity>
+  );
+}
+
+// Enhanced Feature Card Component
+function FeatureCard({ title, description, icon, backgroundColor, textColor, actionText, onPress }: FeatureCardProps) {
+  return (
+    <TouchableOpacity 
+      style={[styles.featureCard, { backgroundColor }]} 
+      onPress={onPress}
+    >
+      <View style={styles.featureHeader}>
+        <View style={[styles.featureIcon, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
+          <IconSymbol name={icon} size={24} color={textColor} />
+        </View>
+        <View style={styles.featureContent}>
+          <ThemedText style={[styles.featureTitle, { color: textColor }]} type="title">
+            {title}
+          </ThemedText>
+        </View>
+      </View>
+      <ThemedText style={[styles.featureDescription, { color: textColor }]}>
+        {description}
+      </ThemedText>
+      <TouchableOpacity 
+        style={[styles.featureAction, { backgroundColor: 'rgba(255,255,255,0.2)' }]}
+        onPress={onPress}
+      >
+        <ThemedText style={[styles.featureActionText, { color: textColor }]} type="defaultSemiBold">
+          {actionText}
+        </ThemedText>
+        <IconSymbol name="arrow.right" size={14} color={textColor} />
+      </TouchableOpacity>
+    </TouchableOpacity>
+  );
+}
+
+// Recent Activity Item Component
+function RecentItem({ title, time, icon, iconColor, colors }: RecentItemProps) {
+  return (
+    <TouchableOpacity 
+      style={[styles.recentItem, { backgroundColor: colors.surface, borderColor: colors.border }]}
+    >
+      <View style={[styles.recentIcon, { backgroundColor: `${iconColor}20` }]}>
+        <IconSymbol name={icon} size={18} color={iconColor} />
+      </View>
+      <View style={styles.recentContent}>
+        <ThemedText style={[styles.recentTitle, { color: colors.text }]} type="defaultSemiBold">
+          {title}
+        </ThemedText>
+        <ThemedText style={[styles.recentTime, { color: colors.text }]}>
+          {time}
         </ThemedText>
       </View>
     </TouchableOpacity>
   );
 }
-
-// Suggestion Card Component
-function SuggestionCard({ title, onPress, type }: SuggestionCardProps) {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
-
-  const getIconName = () => {
-    switch (type) {
-      case 'search': return 'location.fill';
-      case 'announce': return 'megaphone.fill';
-      case 'reserve': return 'clock.fill';
-      case 'pay': return 'creditcard.fill';
-      default: return 'location.fill';
-    }
-  };
-
-  return (
-    <TouchableOpacity style={[styles.suggestionCard, { backgroundColor: colors.surface }]} onPress={onPress}>
-      <View style={[styles.suggestionIcon, { backgroundColor: colors.background }]}>
-        <IconSymbol name={getIconName()} size={24} color={colors.primary} />
-      </View>
-      <ThemedText style={[styles.suggestionTitle, { color: colors.text }]} type="default">
-        {title}
-      </ThemedText>
-    </TouchableOpacity>
-  );
-}
-
-// Planning Card Component
-function PlanningCard({ title, description, backgroundColor, textColor, onPress }: PlanningCardProps) {
-  return (
-    <TouchableOpacity 
-      style={[styles.planningCard, { backgroundColor }]} 
-      onPress={onPress}
-    >
-      <ThemedText style={[styles.planningTitle, { color: textColor }]} type="defaultSemiBold">
-        {title}
-      </ThemedText>
-      <ThemedText style={[styles.planningDescription, { color: textColor }]} type="default">
-        {description}
-      </ThemedText>
-    </TouchableOpacity>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: Platform.select({
-      ios: 105, // 85px tab bar + 20px spacing
-      default: 85, // 65px tab bar + 20px spacing
-    }),
-  },
-  // Header styles
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 15,
-  },
-  headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  logoSmall: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  appName: {
-    fontSize: 20,
-    fontWeight: '600',
-  },
-  // Tab styles
-  tabContainer: {
-    flexDirection: 'row',
-    marginHorizontal: 20,
-    borderRadius: 12,
-    padding: 4,
-    marginBottom: 20,
-  },
-  tab: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 8,
-    gap: 8,
-  },
-  tabText: {
-    fontSize: 16,
-  },
-  // Content styles
-  content: {
-    paddingHorizontal: 20,
-  },
-  // Search styles
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    marginBottom: 24,
-    gap: 12,
-  },
-  searchPlaceholder: {
-    fontSize: 16,
-    flex: 1,
-  },
-  // Saved locations styles
-  savedLocations: {
-    marginBottom: 32,
-    gap: 12,
-  },
-  savedLocationItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    gap: 12,
-  },
-  savedLocationIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  savedLocationContent: {
-    flex: 1,
-  },
-  savedLocationTitle: {
-    fontSize: 16,
-    marginBottom: 2,
-  },
-  savedLocationAddress: {
-    fontSize: 14,
-    opacity: 0.7,
-  },
-  // Suggestions styles
-  suggestionsSection: {
-    marginBottom: 32,
-  },
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  seeAllText: {
-    fontSize: 14,
-  },
-  suggestionsGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  suggestionCard: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 8,
-    borderRadius: 12,
-    gap: 8,
-  },
-  suggestionIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  suggestionTitle: {
-    fontSize: 12,
-    textAlign: 'center',
-  },
-  // Planning section styles
-  planningSection: {
-    marginBottom: 32,
-  },
-  planningCards: {
-    marginTop: 16,
-    gap: 12,
-  },
-  planningCard: {
-    padding: 20,
-    borderRadius: 16,
-    minHeight: 120,
-  },
-  planningTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  planningDescription: {
-    fontSize: 14,
-    lineHeight: 20,
-    opacity: 0.9,
-  },
-});

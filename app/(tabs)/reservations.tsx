@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Alert, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ReservationDetails } from '@/components/ReservationDetails';
 import { ThemedText } from '@/components/ThemedText';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { reservationsStyles as styles } from './reservations.styles';
 
 interface Reservation {
   id: string;
@@ -16,6 +18,8 @@ interface Reservation {
   price: string;
   duration: string;
   status: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 const mockReservations: Reservation[] = [
@@ -27,7 +31,9 @@ const mockReservations: Reservation[] = [
     time: '14:30 - 16:30',
     price: '€5.00',
     duration: '2h',
-    status: 'Confirmada'
+    status: 'Confirmada',
+    latitude: 40.4200,
+    longitude: -3.7025
   },
   {
     id: '2',
@@ -37,7 +43,9 @@ const mockReservations: Reservation[] = [
     time: '09:00 - 11:00',
     price: '€6.00',
     duration: '2h',
-    status: 'Pendiente'
+    status: 'Pendiente',
+    latitude: 40.4240,
+    longitude: -3.7120
   },
   {
     id: '3',
@@ -47,7 +55,9 @@ const mockReservations: Reservation[] = [
     time: '12:00 - 14:00',
     price: '€4.00',
     duration: '2h',
-    status: 'Completada'
+    status: 'Completada',
+    latitude: 40.4300,
+    longitude: -3.6900
   },
 ];
 
@@ -55,6 +65,8 @@ export default function ReservationsScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const [selectedTab, setSelectedTab] = useState<'active' | 'completed'>('active');
+  const [showDetails, setShowDetails] = useState(false);
+  const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
 
   const filteredReservations = mockReservations.filter(reservation => {
     if (selectedTab === 'active') return reservation.type === 'active';
@@ -62,21 +74,20 @@ export default function ReservationsScreen() {
   });
 
   const handleReservationPress = (reservation: Reservation) => {
-    if (reservation.type === 'active') {
-      Alert.alert(
-        'Reserva activa',
-        `${reservation.address}\n${reservation.date} - ${reservation.time}`,
-        [
-          { text: 'Ver detalles' },
-          { text: 'Cancelar reserva', style: 'destructive' }
-        ]
-      );
-    }
+    setSelectedReservation(reservation);
+    setShowDetails(true);
+  };
+
+  const handleBackFromDetails = () => {
+    setShowDetails(false);
+    setSelectedReservation(null);
   };
 
   const handleNewReservation = () => {
     Alert.alert('Nueva reserva', 'Ir al mapa para buscar plazas disponibles');
   };
+
+  // Removed conditional rendering - now using Modal
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
@@ -85,19 +96,35 @@ export default function ReservationsScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Simple Header */}
+        {/* Enhanced Header */}
         <View style={[styles.header, { backgroundColor: colors.background }]}>
           <View style={styles.headerContent}>
-            <View style={[styles.logoSmall, { backgroundColor: colors.primary }]}>
-              <IconSymbol name="calendar" size={20} color={colors.accent} />
+            <View style={styles.logoSection}>
+              <View style={[styles.logoSmall, { backgroundColor: colors.primary }]}>
+                <IconSymbol name="calendar" size={22} color={colors.accent} />
+              </View>
+              <ThemedText style={[styles.appName, { color: colors.text }]} type="title">
+                Mis Reservas
+              </ThemedText>
             </View>
-            <ThemedText style={[styles.appName, { color: colors.text }]} type="defaultSemiBold">
-              Mis Reservas
-            </ThemedText>
+            <View style={styles.headerActions}>
+              <TouchableOpacity 
+                style={[styles.headerButton, { backgroundColor: colors.surface }]}
+                onPress={() => Alert.alert('Filtros', 'Filtrar reservas por fecha, estado, etc.')}
+              >
+                <IconSymbol name="line.3.horizontal.decrease.circle" size={18} color={colors.text} />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.headerButton, { backgroundColor: colors.surface }]}
+                onPress={() => Alert.alert('Ayuda', 'Centro de ayuda para reservas')}
+              >
+                <IconSymbol name="questionmark.circle" size={18} color={colors.primary} />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
-        {/* Tab Selector */}
+        {/* Enhanced Tab Selector */}
         <View style={styles.tabSection}>
           <View style={[styles.tabContainer, { backgroundColor: colors.surface }]}>
             <TouchableOpacity
@@ -107,12 +134,17 @@ export default function ReservationsScreen() {
               ]}
               onPress={() => setSelectedTab('active')}
             >
+              <IconSymbol 
+                name="clock.badge" 
+                size={18} 
+                color={selectedTab === 'active' ? colors.accent : colors.text}
+                style={styles.tabIcon} 
+              />
               <ThemedText 
                 style={[
                   styles.tabText, 
                   { color: selectedTab === 'active' ? colors.accent : colors.text }
                 ]}
-                type="defaultSemiBold"
               >
                 Activas
               </ThemedText>
@@ -125,12 +157,17 @@ export default function ReservationsScreen() {
               ]}
               onPress={() => setSelectedTab('completed')}
             >
+              <IconSymbol 
+                name="checkmark.circle" 
+                size={18} 
+                color={selectedTab === 'completed' ? colors.accent : colors.text}
+                style={styles.tabIcon} 
+              />
               <ThemedText 
                 style={[
                   styles.tabText, 
                   { color: selectedTab === 'completed' ? colors.accent : colors.text }
                 ]}
-                type="defaultSemiBold"
               >
                 Historial
               </ThemedText>
@@ -138,163 +175,265 @@ export default function ReservationsScreen() {
           </View>
         </View>
 
-                 {/* Content */}
-         <View style={styles.content}>
-           {filteredReservations.length === 0 ? (
-             <View style={styles.emptyState}>
-               <View style={[styles.emptyIcon, { backgroundColor: colors.surface }]}>
-                 <IconSymbol name="calendar.badge.exclamationmark" size={64} color={colors.primary} />
-               </View>
-               <ThemedText style={[styles.emptyTitle, { color: colors.text }]} type="title">
-                 {selectedTab === 'active' ? 'No hay reservas activas' : 'Sin historial'}
-               </ThemedText>
-               <ThemedText style={[styles.emptySubtitle, { color: colors.text }]}>
-                 {selectedTab === 'active' 
-                   ? 'Cuando reserves una plaza de aparcamiento aparecerá aquí'
-                   : 'Tus reservas completadas aparecerán en esta sección'
-                 }
-               </ThemedText>
-               {selectedTab === 'active' && (
-                 <TouchableOpacity 
-                   style={[styles.emptyAction, { backgroundColor: colors.primary }]}
-                   onPress={handleNewReservation}
-                 >
-                   <ThemedText style={[styles.emptyActionText, { color: colors.accent }]} type="defaultSemiBold">
-                     Buscar plazas cercanas
-                   </ThemedText>
-                 </TouchableOpacity>
-               )}
-             </View>
-           ) : (
-             <View style={styles.reservationsList}>
-               {filteredReservations.map((reservation, index) => (
-                 <TouchableOpacity
-                   key={reservation.id}
-                   style={[
-                     styles.reservationCard, 
-                     { 
-                       backgroundColor: colors.background,
-                       marginBottom: index === filteredReservations.length - 1 ? 0 : 16
-                     }
-                   ]}
-                   onPress={() => handleReservationPress(reservation)}
-                 >
-                   {/* Status Header */}
-                   <View style={[
-                     styles.statusHeader,
-                     { backgroundColor: getStatusColor(reservation.type, colors) }
-                   ]}>
-                     <View style={styles.statusContent}>
-                       <View style={styles.statusLeft}>
-                         <IconSymbol 
-                           name={reservation.type === 'active' ? 'location.fill' : 'checkmark.circle.fill'} 
-                           size={20} 
-                           color={colors.background} 
-                         />
-                         <ThemedText style={[styles.statusText, { color: colors.background }]} type="defaultSemiBold">
-                           {reservation.status}
-                         </ThemedText>
-                       </View>
-                       <ThemedText style={[styles.priceText, { color: colors.background }]} type="title">
-                         {reservation.price}
-                       </ThemedText>
-                     </View>
-                   </View>
+        {/* Content */}
+        <View style={styles.content}>
+          {filteredReservations.length === 0 ? (
+            <View style={styles.emptyState}>
+              <View style={[styles.emptyIcon, { backgroundColor: colors.surface }]}>
+                <IconSymbol 
+                  name={selectedTab === 'active' ? "clock.badge.exclamationmark" : "calendar.badge.checkmark"} 
+                  size={64} 
+                  color={colors.primary} 
+                />
+              </View>
+              <ThemedText style={[styles.emptyTitle, { color: colors.text }]}>
+                {selectedTab === 'active' ? 'No hay reservas activas' : 'Sin historial de reservas'}
+              </ThemedText>
+              <ThemedText style={[styles.emptySubtitle, { color: colors.text }]}>
+                {selectedTab === 'active' 
+                  ? 'Encuentra y reserva tu plaza de aparcamiento ideal cerca de ti'
+                  : 'Tus reservas completadas y canceladas aparecerán en esta sección'
+                }
+              </ThemedText>
+              {selectedTab === 'active' && (
+                <TouchableOpacity 
+                  style={[styles.emptyAction, { backgroundColor: colors.primary }]}
+                  onPress={handleNewReservation}
+                >
+                  <IconSymbol name="magnifyingglass" size={16} color={colors.accent} />
+                  <ThemedText style={[styles.emptyActionText, { color: colors.accent }]}>
+                    Buscar plazas cercanas
+                  </ThemedText>
+                </TouchableOpacity>
+              )}
+            </View>
+          ) : (
+            <>
+              {/* Stats Section */}
+              <View style={styles.statsSection}>
+                <View style={[styles.statsContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                  <View style={styles.statItem}>
+                    <ThemedText style={[styles.statNumber, { color: colors.primary }]} type="title">
+                      {filteredReservations.length}
+                    </ThemedText>
+                    <ThemedText style={[styles.statLabel, { color: colors.text }]}>
+                      {selectedTab === 'active' ? 'Activas' : 'Completadas'}
+                    </ThemedText>
+                  </View>
+                  <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
+                  <View style={styles.statItem}>
+                    <ThemedText style={[styles.statNumber, { color: colors.success }]} type="title">
+                      {filteredReservations.reduce((sum, r) => sum + parseFloat(r.price.replace('€', '')), 0).toFixed(2)}€
+                    </ThemedText>
+                    <ThemedText style={[styles.statLabel, { color: colors.text }]}>
+                      Total gastado
+                    </ThemedText>
+                  </View>
+                  <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
+                  <View style={styles.statItem}>
+                    <ThemedText style={[styles.statNumber, { color: colors.warning }]} type="title">
+                      {filteredReservations.filter(r => r.type === 'active').length}
+                    </ThemedText>
+                    <ThemedText style={[styles.statLabel, { color: colors.text }]}>
+                      Pendientes
+                    </ThemedText>
+                  </View>
+                </View>
+              </View>
+              {/* Enhanced Reservations List */}
+              <View style={styles.reservationsList}>
+                {filteredReservations.map((reservation, index) => (
+                  <TouchableOpacity
+                    key={reservation.id}
+                    style={[styles.reservationCard, { backgroundColor: colors.background }]}
+                    onPress={() => handleReservationPress(reservation)}
+                  >
+                    {/* Enhanced Status Header */}
+                    <View style={[
+                      styles.statusHeader,
+                      { backgroundColor: getStatusColor(reservation.type, colors) }
+                    ]}>
+                      <View style={styles.statusContent}>
+                        <View style={styles.statusLeft}>
+                          <View style={styles.statusIcon}>
+                            <IconSymbol 
+                              name={reservation.type === 'active' ? 'clock.fill' : 'checkmark.circle.fill'} 
+                              size={16} 
+                              color={colors.background} 
+                            />
+                          </View>
+                          <View style={styles.statusTextContainer}>
+                            <ThemedText style={[styles.statusText, { color: colors.background }]}>
+                              {reservation.status}
+                            </ThemedText>
+                            <ThemedText style={[styles.statusSubtext, { color: colors.background }]}>
+                              {reservation.type === 'active' ? 'En curso' : 'Finalizada'}
+                            </ThemedText>
+                          </View>
+                        </View>
+                        <View style={styles.priceContainer}>
+                          <ThemedText style={[styles.priceText, { color: colors.background }]}>
+                            {reservation.price}
+                          </ThemedText>
+                          <ThemedText style={[styles.priceLabel, { color: colors.background }]}>
+                            {reservation.duration}
+                          </ThemedText>
+                        </View>
+                      </View>
+                      <View style={[styles.statusGradient, { backgroundColor: colors.background }]} />
+                    </View>
 
-                   {/* Main Content */}
-                   <View style={styles.cardContent}>
-                     {/* Date and Time */}
-                     <View style={styles.dateTimeSection}>
-                       <ThemedText style={[styles.dateText, { color: colors.text }]} type="defaultSemiBold">
-                         {reservation.date}
-                       </ThemedText>
-                       <ThemedText style={[styles.timeText, { color: colors.text }]}>
-                         {reservation.time} • {reservation.duration}
-                       </ThemedText>
-                     </View>
+                    {/* Enhanced Main Content */}
+                    <View style={styles.cardContent}>
+                      {/* Enhanced Date and Time */}
+                      <View style={[styles.dateTimeSection, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                        <View style={styles.dateTimeHeader}>
+                          <IconSymbol name="calendar" size={14} color={colors.primary} />
+                          <ThemedText style={[styles.dateText, { color: colors.text }]}>
+                            {reservation.date}
+                          </ThemedText>
+                        </View>
+                        <View style={styles.timeContainer}>
+                          <IconSymbol name="clock" size={12} color={colors.text} />
+                          <ThemedText style={[styles.timeText, { color: colors.text }]}>
+                            {reservation.time}
+                          </ThemedText>
+                          <View style={[styles.durationBadge, { backgroundColor: colors.primary }]}>
+                            <ThemedText style={[styles.durationText, { color: colors.accent }]}>
+                              {reservation.duration}
+                            </ThemedText>
+                          </View>
+                        </View>
+                      </View>
 
-                     {/* Location */}
-                     <View style={styles.locationSection}>
-                       <View style={styles.locationDot}>
-                         <View style={[styles.dot, { backgroundColor: colors.primary }]} />
-                       </View>
-                       <View style={styles.locationContent}>
-                         <ThemedText style={[styles.locationLabel, { color: colors.text }]} type="default">
-                           Plaza de aparcamiento
-                         </ThemedText>
-                         <ThemedText style={[styles.locationAddress, { color: colors.text }]} type="defaultSemiBold">
-                           {reservation.address}
-                         </ThemedText>
-                       </View>
-                     </View>
+                      {/* Enhanced Location */}
+                      <View style={[styles.locationSection, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                        <View style={styles.locationHeader}>
+                          <View style={[styles.locationIcon, { backgroundColor: colors.primary }]}>
+                            <IconSymbol name="mappin.circle.fill" size={14} color={colors.accent} />
+                          </View>
+                          <ThemedText style={[styles.locationHeaderText, { color: colors.text }]}>
+                            Plaza de aparcamiento
+                          </ThemedText>
+                        </View>
+                        <ThemedText style={[styles.locationAddress, { color: colors.text }]}>
+                          {reservation.address}
+                        </ThemedText>
+                        <View style={styles.locationDetails}>
+                          <View style={styles.locationDetail}>
+                            <IconSymbol name="location" size={10} color={colors.text} />
+                            <ThemedText style={[styles.locationDetailText, { color: colors.text }]}>
+                              Zona centro
+                            </ThemedText>
+                          </View>
+                          <View style={styles.locationDetail}>
+                            <IconSymbol name="car" size={10} color={colors.text} />
+                            <ThemedText style={[styles.locationDetailText, { color: colors.text }]}>
+                              Cubierta
+                            </ThemedText>
+                          </View>
+                        </View>
+                      </View>
 
-                     {/* Actions */}
-                     <View style={styles.actionsSection}>
-                       {reservation.type === 'active' ? (
-                         <View style={styles.actionButtons}>
-                           <TouchableOpacity 
-                             style={[styles.actionButton, styles.secondaryButton, { borderColor: colors.border }]}
-                             onPress={() => Alert.alert('Extender', 'Extender tiempo de reserva')}
-                           >
-                             <IconSymbol name="clock.fill" size={16} color={colors.text} />
-                             <ThemedText style={[styles.actionButtonText, { color: colors.text }]}>
-                               Extender
-                             </ThemedText>
-                           </TouchableOpacity>
-                           
-                           <TouchableOpacity 
-                             style={[styles.actionButton, styles.primaryButton, { backgroundColor: colors.primary }]}
-                             onPress={() => Alert.alert('Navegación', 'Abrir en mapa')}
-                           >
-                             <IconSymbol name="location.fill" size={16} color={colors.accent} />
-                             <ThemedText style={[styles.actionButtonText, { color: colors.accent }]}>
-                               Ver en mapa
-                             </ThemedText>
-                           </TouchableOpacity>
-                         </View>
-                       ) : (
-                         <View style={styles.actionButtons}>
-                           <TouchableOpacity 
-                             style={[styles.actionButton, styles.secondaryButton, { borderColor: colors.border }]}
-                             onPress={() => Alert.alert('Recibo', 'Ver recibo de la transacción')}
-                           >
-                             <IconSymbol name="creditcard.fill" size={16} color={colors.text} />
-                             <ThemedText style={[styles.actionButtonText, { color: colors.text }]}>
-                               Ver recibo
-                             </ThemedText>
-                           </TouchableOpacity>
-                           
-                           <TouchableOpacity 
-                             style={[styles.actionButton, styles.primaryButton, { backgroundColor: colors.primary }]}
-                             onPress={() => Alert.alert('Reservar', 'Reservar de nuevo en esta ubicación')}
-                           >
-                             <IconSymbol name="arrow.2.circlepath" size={16} color={colors.accent} />
-                             <ThemedText style={[styles.actionButtonText, { color: colors.accent }]}>
-                               Reservar de nuevo
-                             </ThemedText>
-                           </TouchableOpacity>
-                         </View>
-                       )}
-                     </View>
-                   </View>
-                 </TouchableOpacity>
-               ))}
-             </View>
-           )}
-         </View>
+                      {/* Enhanced Actions */}
+                      <View style={[styles.actionsSection, { borderTopColor: colors.border }]}>
+                        {reservation.type === 'active' ? (
+                          <View style={styles.actionButtons}>
+                            <TouchableOpacity 
+                              style={[styles.actionButton, styles.secondaryButton, { borderColor: colors.border, backgroundColor: colors.surface }]}
+                              onPress={() => Alert.alert('Extender', 'Extender tiempo de reserva')}
+                            >
+                              <IconSymbol name="clock.arrow.circlepath" size={14} color={colors.text} />
+                              <ThemedText style={[styles.actionButtonText, { color: colors.text }]}>
+                                Extender
+                              </ThemedText>
+                            </TouchableOpacity>
+                            
+                            <TouchableOpacity 
+                              style={[styles.actionButton, styles.primaryButton, { backgroundColor: colors.primary }]}
+                              onPress={() => Alert.alert('Navegación', 'Abrir en mapa')}
+                            >
+                              <IconSymbol name="location.fill" size={14} color={colors.accent} />
+                              <ThemedText style={[styles.actionButtonText, { color: colors.accent }]}>
+                                Ir ahora
+                              </ThemedText>
+                            </TouchableOpacity>
+                          </View>
+                        ) : (
+                          <>
+                            <View style={styles.quickActions}>
+                              <TouchableOpacity 
+                                style={[styles.quickAction, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                                onPress={() => Alert.alert('Recibo', 'Ver recibo de la transacción')}
+                              >
+                                <IconSymbol name="doc.text" size={12} color={colors.text} />
+                                <ThemedText style={[styles.quickActionText, { color: colors.text }]}>
+                                  Recibo
+                                </ThemedText>
+                              </TouchableOpacity>
+                              
+                              <TouchableOpacity 
+                                style={[styles.quickAction, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                                onPress={() => Alert.alert('Valorar', 'Valorar experiencia')}
+                              >
+                                <IconSymbol name="star" size={12} color={colors.warning} />
+                                <ThemedText style={[styles.quickActionText, { color: colors.text }]}>
+                                  Valorar
+                                </ThemedText>
+                              </TouchableOpacity>
+                              
+                              <TouchableOpacity 
+                                style={[styles.quickAction, { backgroundColor: colors.primary }]}
+                                onPress={() => Alert.alert('Reservar', 'Reservar de nuevo en esta ubicación')}
+                              >
+                                <IconSymbol name="arrow.2.circlepath" size={12} color={colors.accent} />
+                                <ThemedText style={[styles.quickActionText, { color: colors.accent }]}>
+                                  Repetir
+                                </ThemedText>
+                              </TouchableOpacity>
+                            </View>
+                          </>
+                        )}
+                      </View>
+                    </View>
 
-        {/* Floating Action Button for Active Tab */}
+                    {/* Tap indicator */}
+                    <View style={{ 
+                      position: 'absolute',
+                      top: 12,
+                      right: 12,
+                      backgroundColor: colors.surface,
+                      borderRadius: 10,
+                      padding: 5
+                    }}>
+                      <IconSymbol name="chevron.right" size={10} color={colors.text} style={{ opacity: 0.5 }} />
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </>
+          )}
+        </View>
+
+        {/* Enhanced Floating Action Button for Active Tab */}
         {selectedTab === 'active' && (
           <View style={styles.fabContainer}>
             <TouchableOpacity
               style={[styles.fab, { backgroundColor: colors.primary }]}
               onPress={handleNewReservation}
             >
-              <IconSymbol name="plus" size={24} color={colors.accent} />
+              <IconSymbol name="plus.circle.fill" size={26} color={colors.accent} style={styles.fabIcon} />
             </TouchableOpacity>
           </View>
         )}
       </ScrollView>
+
+      {/* Modal de Detalles de Reserva */}
+      <ReservationDetails
+        visible={showDetails}
+        reservation={selectedReservation}
+        onBack={handleBackFromDetails}
+      />
     </SafeAreaView>
   );
 }
@@ -312,239 +451,3 @@ function getStatusColor(type: Reservation['type'], colors: any) {
   }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: Platform.select({
-      ios: 165, // 85px tab bar + 80px spacing
-      default: 145, // 65px tab bar + 80px spacing
-    }),
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 15,
-  },
-  headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  logoSmall: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  appName: {
-    fontSize: 20,
-    fontWeight: '600',
-  },
-  tabSection: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    borderRadius: 12,
-    padding: 4,
-  },
-  tab: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 8,
-    gap: 8,
-  },
-  tabText: {
-    fontSize: 16,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  // Empty State
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 80,
-    paddingHorizontal: 40,
-  },
-  emptyIcon: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 32,
-  },
-  emptyTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  emptySubtitle: {
-    fontSize: 16,
-    textAlign: 'center',
-    opacity: 0.7,
-    lineHeight: 24,
-    marginBottom: 32,
-  },
-  emptyAction: {
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 28,
-  },
-  emptyActionText: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  // Reservations List
-  reservationsList: {
-    flex: 1,
-  },
-  reservationCard: {
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    elevation: 6,
-    overflow: 'hidden',
-  },
-  // Status Header
-  statusHeader: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-  },
-  statusContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  statusLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  statusText: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  priceText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  // Card Content
-  cardContent: {
-    padding: 20,
-  },
-  dateTimeSection: {
-    marginBottom: 20,
-  },
-  dateText: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  timeText: {
-    fontSize: 14,
-    opacity: 0.7,
-  },
-  // Location Section
-  locationSection: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 24,
-    gap: 12,
-  },
-  locationDot: {
-    marginTop: 4,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  locationContent: {
-    flex: 1,
-  },
-  locationLabel: {
-    fontSize: 14,
-    opacity: 0.7,
-    marginBottom: 4,
-  },
-  locationAddress: {
-    fontSize: 16,
-    fontWeight: '500',
-    lineHeight: 22,
-  },
-  // Actions Section
-  actionsSection: {
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.08)',
-    paddingTop: 20,
-  },
-  actionButtons: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  actionButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    gap: 6,
-  },
-  secondaryButton: {
-    borderWidth: 1,
-    backgroundColor: 'transparent',
-  },
-  primaryButton: {
-    borderWidth: 0,
-  },
-  actionButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  fabContainer: {
-    position: 'absolute',
-    bottom: Platform.select({
-      ios: 105, // 85px tab bar + 20px spacing
-      default: 85, // 65px tab bar + 20px spacing
-    }),
-    right: 20,
-  },
-  fab: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-});
