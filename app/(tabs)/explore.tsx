@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { WebView } from 'react-native-webview';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/ThemedText';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -69,11 +68,25 @@ export default function ExploreScreen() {
   const colors = Colors[colorScheme ?? 'light'];
   const [selectedFilter, setSelectedFilter] = useState<'available' | 'all'>('available');
   const [mapView, setMapView] = useState(true);
+  const mapRef = useRef<MapView>(null);
+  const scrollRef = useRef<any>(null);
   
   const getToggleIcon = (): 'funnel.fill' | 'map.fill' => {
     return mapView ? 'funnel.fill' : 'map.fill';
   };
   const { location, errorMsg, loading, getCurrentLocation } = useLocation();
+  
+  // Auto-center map on user location when available
+  useEffect(() => {
+    if (location && mapRef.current) {
+      mapRef.current.animateToRegion({
+        latitude: location.latitude,
+        longitude: location.longitude,
+        latitudeDelta: 0.015,
+        longitudeDelta: 0.015,
+      }, 1000);
+    }
+  }, [location]);
   
   const filteredSpots = mockParkingSpots.filter(spot => {
     if (selectedFilter === 'all') return true;
@@ -81,23 +94,107 @@ export default function ExploreScreen() {
   });
 
   const handleSpotPress = (spot: ParkingSpot) => {
-    Alert.alert(
-      'Plaza de aparcamiento',
-      `${spot.address}\n${spot.price}\nDisponible: ${spot.timeLeft}`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Reservar', onPress: () => Alert.alert('Reservado', `Plaza en ${spot.address} reservada`) }
-      ]
-    );
+    // Hacer scroll hacia el mapa para mostrarlo
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({ y: 0, animated: true });
+    }
+
+    // Centrar el mapa en la plaza seleccionada
+    if (mapRef.current) {
+      setTimeout(() => {
+        mapRef.current?.animateToRegion({
+          latitude: spot.latitude,
+          longitude: spot.longitude,
+          latitudeDelta: 0.01, // Zoom más cercano para ver la plaza
+          longitudeDelta: 0.01,
+        }, 800);
+      }, 300); // Delay para que primero se haga el scroll
+    }
+
+    // Mostrar el alert después del scroll y zoom
+    setTimeout(() => {
+      Alert.alert(
+        'Plaza de aparcamiento',
+        `${spot.address}\n${spot.price}\nDisponible: ${spot.timeLeft}\nDistancia: ${spot.distance}`,
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          { 
+            text: 'Ver en mapa', 
+            onPress: () => {
+              // Hacer zoom aún más cercano cuando presionan "Ver en mapa"
+              if (mapRef.current) {
+                mapRef.current.animateToRegion({
+                  latitude: spot.latitude,
+                  longitude: spot.longitude,
+                  latitudeDelta: 0.005, // Zoom muy cercano
+                  longitudeDelta: 0.005,
+                }, 600);
+              }
+            }
+          },
+          { 
+            text: 'Reservar', 
+            onPress: () => Alert.alert('Reservado', `Plaza en ${spot.address} reservada`) 
+          }
+        ]
+      );
+    }, 800);
   };
 
   const handleSearchPress = () => {
     Alert.alert('Búsqueda', 'Abrir búsqueda de ubicación');
   };
 
+  const centerOnUserLocation = async () => {
+    try {
+      Alert.alert(
+        '📍 Ubicación GPS',
+        '¿Deseas actualizar tu ubicación y centrar el mapa?',
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          { 
+            text: 'Sí, obtener ubicación', 
+            onPress: async () => {
+              await getCurrentLocation();
+              // El useEffect se encargará de centrar el mapa cuando la ubicación se actualice
+            }
+          }
+        ]
+      );
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo obtener tu ubicación');
+    }
+  };
+
+  const handleMarkerPress = (spot: ParkingSpot) => {
+    // Zoom directo al marcador
+    if (mapRef.current) {
+      mapRef.current.animateToRegion({
+        latitude: spot.latitude,
+        longitude: spot.longitude,
+        latitudeDelta: 0.005,
+        longitudeDelta: 0.005,
+      }, 500);
+    }
+
+    // Mostrar información del spot sin mover el mapa de nuevo
+    Alert.alert(
+      'Plaza de aparcamiento',
+      `${spot.address}\n${spot.price}\nDisponible: ${spot.timeLeft}\nDistancia: ${spot.distance}`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { 
+          text: 'Reservar', 
+          onPress: () => Alert.alert('Reservado', `Plaza en ${spot.address} reservada`) 
+        }
+      ]
+    );
+  };
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView 
+        ref={scrollRef}
         style={styles.scrollView} 
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -193,16 +290,38 @@ export default function ExploreScreen() {
                 <View style={[styles.mapPlaceholder, { backgroundColor: colors.surface }]}>
                   <ActivityIndicator size="large" color={colors.primary} />
                   <ThemedText style={[styles.mapText, { color: colors.text }]} type="defaultSemiBold">
-                    Cargando mapa...
+                    📍 Obteniendo tu ubicación...
                   </ThemedText>
+                  <ThemedText style={[styles.mapSubtext, { color: colors.text }]}>
+                    Asegúrate de permitir el acceso al GPS
+                  </ThemedText>
+                </View>
+              ) : errorMsg ? (
+                <View style={[styles.mapPlaceholder, { backgroundColor: colors.surface }]}>
+                  <IconSymbol name="location.fill" size={48} color={colors.error} />
+                  <ThemedText style={[styles.mapText, { color: colors.error }]} type="defaultSemiBold">
+                    Error de ubicación
+                  </ThemedText>
+                  <ThemedText style={[styles.mapSubtext, { color: colors.text }]}>
+                    {errorMsg}
+                  </ThemedText>
+                  <TouchableOpacity 
+                    style={[styles.retryButton, { backgroundColor: colors.primary }]}
+                    onPress={getCurrentLocation}
+                  >
+                    <ThemedText style={[styles.retryText, { color: colors.accent }]}>
+                      Reintentar
+                    </ThemedText>
+                  </TouchableOpacity>
                 </View>
               ) : (
                 <MapView
+                  ref={mapRef}
                   style={styles.map}
                   provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
                   initialRegion={{
-                    latitude: 40.4168,
-                    longitude: -3.7038,
+                    latitude: location?.latitude || 40.4168,
+                    longitude: location?.longitude || -3.7038,
                     latitudeDelta: 0.015,
                     longitudeDelta: 0.015,
                   }}
@@ -245,7 +364,7 @@ export default function ExploreScreen() {
                       title={spot.address}
                       description={`${spot.price} • ${getStatusText(spot.type)} • ${spot.distance}`}
                       pinColor={getMarkerColor(spot.type, colors)}
-                      onPress={() => handleSpotPress(spot)}
+                      onPress={() => handleMarkerPress(spot)}
                     >
                       <View style={[
                         styles.customMarker, 
@@ -263,7 +382,7 @@ export default function ExploreScreen() {
             <View style={styles.mapControls}>
               <TouchableOpacity 
                 style={[styles.mapControl, { backgroundColor: colors.background, borderColor: colors.border }]}
-                onPress={getCurrentLocation}
+                onPress={centerOnUserLocation}
               >
                 <IconSymbol name="location.fill" size={20} color={colors.primary} />
               </TouchableOpacity>
@@ -464,7 +583,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   mapContainer: {
-    height: 250,
+    height: 350,
     borderRadius: 16,
     overflow: 'hidden',
     backgroundColor: '#f0f0f0',
@@ -482,6 +601,23 @@ const styles = StyleSheet.create({
   mapText: {
     fontSize: 16,
     marginTop: 12,
+    textAlign: 'center',
+  },
+  mapSubtext: {
+    fontSize: 14,
+    marginTop: 8,
+    textAlign: 'center',
+    opacity: 0.7,
+  },
+  retryButton: {
+    marginTop: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+  },
+  retryText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
   mapControls: {
     position: 'absolute',

@@ -17,44 +17,33 @@ export interface LocationHookResult {
 }
 
 export function useLocation(): LocationHookResult {
-  const [location, setLocation] = useState<LocationData | null>({
-    latitude: 40.4168,
-    longitude: -3.7038,
-    latitudeDelta: 0.015,
-    longitudeDelta: 0.015,
-  });
+  const [location, setLocation] = useState<LocationData | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const requestPermission = async (): Promise<boolean> => {
     try {
+      // Primero verificar el estado actual de los permisos
+      const { status: existingStatus } = await Location.getForegroundPermissionsAsync();
+      
+      if (existingStatus === 'granted') {
+        return true;
+      }
+
+      // Si no tenemos permisos, solicitarlos
       const { status } = await Location.requestForegroundPermissionsAsync();
       
       if (status !== 'granted') {
-        // Si no tenemos permisos, usar ubicación por defecto (Madrid)
-        console.log('Permission denied, using default location');
-        const defaultLocation: LocationData = {
-          latitude: 40.4168,
-          longitude: -3.7038,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        };
-        setLocation(defaultLocation);
+        setErrorMsg('Se necesitan permisos de ubicación para mostrar tu posición en el mapa');
         setLoading(false);
         return false;
       }
       
+      setErrorMsg(null);
       return true;
     } catch (error) {
-      console.log('Error requesting permission, using default location');
-      // Si hay error, usar ubicación por defecto
-      const defaultLocation: LocationData = {
-        latitude: 40.4168,
-        longitude: -3.7038,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      };
-      setLocation(defaultLocation);
+      console.error('Error requesting location permission:', error);
+      setErrorMsg('Error al solicitar permisos de ubicación');
       setLoading(false);
       return false;
     }
@@ -67,32 +56,33 @@ export function useLocation(): LocationHookResult {
 
       const hasPermission = await requestPermission();
       if (!hasPermission) {
-        return; // Ya se estableció la ubicación por defecto
+        return; // No se pudo obtener permiso
       }
 
+      console.log('📍 Obteniendo ubicación GPS del dispositivo...');
+      
       const currentLocation = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
+        accuracy: Location.Accuracy.High, // Usar alta precisión
+      });
+
+      console.log('✅ Ubicación obtenida:', {
+        lat: currentLocation.coords.latitude,
+        lng: currentLocation.coords.longitude,
+        accuracy: currentLocation.coords.accuracy
       });
 
       const locationData: LocationData = {
         latitude: currentLocation.coords.latitude,
         longitude: currentLocation.coords.longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
+        latitudeDelta: 0.015,
+        longitudeDelta: 0.015,
       };
 
       setLocation(locationData);
       setLoading(false);
     } catch (error) {
-      console.error('Error getting location:', error);
-      // Si hay error, usar ubicación por defecto (Madrid)
-      const defaultLocation: LocationData = {
-        latitude: 40.4168,
-        longitude: -3.7038,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      };
-      setLocation(defaultLocation);
+      console.error('❌ Error obteniendo ubicación:', error);
+      setErrorMsg('No se pudo obtener tu ubicación. Verifica que el GPS esté activado.');
       setLoading(false);
     }
   };
