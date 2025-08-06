@@ -42,18 +42,18 @@ export default function HomeScreen() {
         {/* Tab Selector */}
         <View style={[styles.tabContainer, { backgroundColor: colors.surface }]}>
           <TouchableOpacity 
-            style={[styles.tab, activeTab === 'buscar' && { backgroundColor: colors.background }]}
+            style={[styles.tab, activeTab === 'buscar' && { backgroundColor: colors.primary }]}
             onPress={() => setActiveTab('buscar')}
           >
             <IconSymbol 
               name="magnifyingglass" 
               size={18} 
-              color={activeTab === 'buscar' ? colors.primary : colors.text} 
+              color={activeTab === 'buscar' ? colors.accent : colors.text} 
             />
             <ThemedText 
               style={[
                 styles.tabText, 
-                { color: activeTab === 'buscar' ? colors.primary : colors.text }
+                { color: activeTab === 'buscar' ? colors.accent : colors.text }
               ]}
               type="defaultSemiBold"
             >
@@ -62,18 +62,18 @@ export default function HomeScreen() {
           </TouchableOpacity>
           
           <TouchableOpacity 
-            style={[styles.tab, activeTab === 'ofrecer' && { backgroundColor: colors.background }]}
+            style={[styles.tab, activeTab === 'ofrecer' && { backgroundColor: colors.primary }]}
             onPress={() => setActiveTab('ofrecer')}
           >
             <IconSymbol 
               name="megaphone.fill" 
               size={18} 
-              color={activeTab === 'ofrecer' ? colors.primary : colors.text} 
+              color={activeTab === 'ofrecer' ? colors.accent : colors.text} 
             />
             <ThemedText 
               style={[
                 styles.tabText, 
-                { color: activeTab === 'ofrecer' ? colors.primary : colors.text }
+                { color: activeTab === 'ofrecer' ? colors.accent : colors.text }
               ]}
               type="defaultSemiBold"
             >
@@ -85,10 +85,10 @@ export default function HomeScreen() {
         <View style={styles.content}>
           {/* Search Input */}
           <TouchableOpacity 
-            style={[styles.searchContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}
+            style={[styles.searchContainer, { backgroundColor: colors.background, borderColor: colors.primary }]}
             onPress={() => handleFeaturePress('Búsqueda')}
           >
-            <IconSymbol name="magnifyingglass" size={20} color={colors.text} />
+            <IconSymbol name="magnifyingglass" size={20} color={colors.primary} />
             <ThemedText style={[styles.searchPlaceholder, { color: colors.text }]}>
               {activeTab === 'buscar' ? '¿Dónde quieres aparcar?' : '¿Dónde dejas tu plaza?'}
             </ThemedText>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
 import { ThemedText } from '@/components/ThemedText';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -195,275 +196,74 @@ export default function ExploreScreen() {
                     Cargando mapa...
                   </ThemedText>
                 </View>
-              ) : Platform.OS === 'ios' ? (
-                <WebView
-                  style={styles.map}
-                  source={{
-                    html: `
-                      <!DOCTYPE html>
-                      <html>
-                      <head>
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        <style>
-                          * { margin: 0; padding: 0; }
-                          html, body { height: 100%; width: 100%; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
-                          #map { 
-                            height: 100%; 
-                            width: 100%; 
-                            background: linear-gradient(135deg, #f5f5f7 0%, #e8e8ed 100%);
-                            position: relative;
-                            overflow: hidden;
-                          }
-                          .street { 
-                            position: absolute; 
-                            background: #ffffff; 
-                            border-radius: 3px;
-                            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-                          }
-                          .building { 
-                            position: absolute; 
-                            background: #f0f0f0; 
-                            border: 1px solid #e0e0e0;
-                            border-radius: 6px;
-                            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                          }
-                          .park {
-                            position: absolute;
-                            background: #c8e6c9;
-                            border-radius: 8px;
-                            border: 1px solid #a5d6a7;
-                          }
-                          .marker { 
-                            position: absolute; 
-                            width: 32px; 
-                            height: 32px; 
-                            border-radius: 50%; 
-                            border: 3px solid white;
-                            cursor: pointer;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            font-weight: bold;
-                            color: white;
-                            font-size: 14px;
-                            box-shadow: 0 3px 12px rgba(0,0,0,0.3);
-                            transform: translate(-50%, -50%);
-                            z-index: 10;
-                            transition: all 0.2s ease;
-                          }
-                          .marker:hover {
-                            transform: translate(-50%, -50%) scale(1.1);
-                          }
-                          .user-marker {
-                            background: #007AFF;
-                            animation: pulse 2s infinite;
-                            width: 20px;
-                            height: 20px;
-                          }
-                          .available { 
-                            background: #34C759;
-                            animation: availablePulse 3s infinite;
-                          }
-                          .reserved { background: #FF9500; }
-                          .occupied { background: #FF3B30; }
-                          
-                          @keyframes pulse {
-                            0% { box-shadow: 0 0 0 0 rgba(0, 122, 255, 0.7); }
-                            70% { box-shadow: 0 0 0 15px rgba(0, 122, 255, 0); }
-                            100% { box-shadow: 0 0 0 0 rgba(0, 122, 255, 0); }
-                          }
-                          
-                          @keyframes availablePulse {
-                            0% { box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.5); }
-                            70% { box-shadow: 0 0 0 10px rgba(52, 199, 89, 0); }
-                            100% { box-shadow: 0 0 0 0 rgba(52, 199, 89, 0); }
-                          }
-                          
-                          .label {
-                            position: absolute;
-                            background: rgba(0,0,0,0.8);
-                            color: white;
-                            padding: 4px 8px;
-                            border-radius: 4px;
-                            font-size: 11px;
-                            font-weight: 500;
-                            white-space: nowrap;
-                            z-index: 5;
-                            transform: translate(-50%, -100%);
-                            margin-top: -8px;
-                          }
-                        </style>
-                      </head>
-                      <body>
-                        <div id="map">
-                          <!-- Streets with Apple Maps style -->
-                          <div class="street" style="top: 25%; left: 0; width: 100%; height: 10px;"></div>
-                          <div class="street" style="top: 50%; left: 0; width: 100%; height: 12px;"></div>
-                          <div class="street" style="top: 75%; left: 0; width: 100%; height: 10px;"></div>
-                          <div class="street" style="top: 0; left: 25%; width: 10px; height: 100%;"></div>
-                          <div class="street" style="top: 0; left: 50%; width: 12px; height: 100%;"></div>
-                          <div class="street" style="top: 0; left: 75%; width: 10px; height: 100%;"></div>
-                          
-                          <!-- Buildings with Apple Maps styling -->
-                          <div class="building" style="top: 5%; left: 5%; width: 18%; height: 18%;"></div>
-                          <div class="building" style="top: 5%; left: 27%; width: 20%; height: 18%;"></div>
-                          <div class="building" style="top: 5%; left: 52%; width: 20%; height: 18%;"></div>
-                          <div class="building" style="top: 5%; left: 77%; width: 18%; height: 18%;"></div>
-                          
-                          <div class="building" style="top: 27%; left: 5%; width: 18%; height: 20%;"></div>
-                          <div class="building" style="top: 27%; left: 77%; width: 18%; height: 20%;"></div>
-                          
-                          <div class="building" style="top: 52%; left: 5%; width: 18%; height: 20%;"></div>
-                          <div class="building" style="top: 52%; left: 77%; width: 18%; height: 20%;"></div>
-                          
-                          <div class="building" style="top: 77%; left: 5%; width: 18%; height: 18%;"></div>
-                          <div class="building" style="top: 77%; left: 27%; width: 20%; height: 18%;"></div>
-                          <div class="building" style="top: 77%; left: 52%; width: 20%; height: 18%;"></div>
-                          <div class="building" style="top: 77%; left: 77%; width: 18%; height: 18%;"></div>
-                          
-                          <!-- Parks -->
-                          <div class="park" style="top: 30%; left: 30%; width: 15%; height: 15%;"></div>
-                          <div class="park" style="top: 55%; left: 55%; width: 15%; height: 15%;"></div>
-                          
-                          <!-- User Location -->
-                          <div class="marker user-marker" style="top: 50%; left: 50%;"></div>
-                          <div class="label" style="top: 50%; left: 50%;">Tu ubicación</div>
-                          
-                          <!-- Parking Spots -->
-                          <div class="marker available" style="top: 30%; left: 15%;">P</div>
-                          <div class="label" style="top: 30%; left: 15%;">€2.50/h</div>
-                          
-                          <div class="marker reserved" style="top: 70%; left: 40%;">P</div>
-                          <div class="label" style="top: 70%; left: 40%;">€3.00/h</div>
-                          
-                          <div class="marker available" style="top: 20%; left: 85%;">P</div>
-                          <div class="label" style="top: 20%; left: 85%;">€2.00/h</div>
-                          
-                          <div class="marker occupied" style="top: 85%; left: 20%;">P</div>
-                          <div class="label" style="top: 85%; left: 20%;">€4.00/h</div>
-                          
-                          <div class="marker available" style="top: 40%; left: 65%;">P</div>
-                          <div class="label" style="top: 40%; left: 65%;">€2.80/h</div>
-                        </div>
-                      </body>
-                      </html>
-                    `,
-                  }}
-                  javaScriptEnabled={true}
-                  domStorageEnabled={true}
-                  startInLoadingState={true}
-                />
               ) : (
-                <WebView
+                <MapView
                   style={styles.map}
-                  source={{
-                    html: `
-                      <!DOCTYPE html>
-                      <html>
-                      <head>
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        <style>
-                          * { margin: 0; padding: 0; }
-                          html, body { height: 100%; width: 100%; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
-                          #map { 
-                            height: 100%; 
-                            width: 100%; 
-                            background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
-                            position: relative;
-                            overflow: hidden;
-                          }
-                          .street { 
-                            position: absolute; 
-                            background: #ddd; 
-                            border-radius: 2px;
-                          }
-                          .building { 
-                            position: absolute; 
-                            background: #ccc; 
-                            border: 1px solid #bbb;
-                            border-radius: 4px;
-                          }
-                          .marker { 
-                            position: absolute; 
-                            width: 24px; 
-                            height: 24px; 
-                            border-radius: 50%; 
-                            border: 2px solid white;
-                            cursor: pointer;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            font-weight: bold;
-                            color: white;
-                            font-size: 12px;
-                            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-                            transform: translate(-50%, -50%);
-                            z-index: 10;
-                          }
-                          .user-marker {
-                            background: #3A7A6B;
-                            animation: pulse 2s infinite;
-                          }
-                          .available { background: #10B981; }
-                          .reserved { background: #F59E0B; }
-                          .occupied { background: #EF4444; }
-                          @keyframes pulse {
-                            0% { box-shadow: 0 0 0 0 rgba(58, 122, 107, 0.7); }
-                            70% { box-shadow: 0 0 0 10px rgba(58, 122, 107, 0); }
-                            100% { box-shadow: 0 0 0 0 rgba(58, 122, 107, 0); }
-                          }
-                        </style>
-                      </head>
-                      <body>
-                        <div id="map">
-                          <!-- Streets -->
-                          <div class="street" style="top: 30%; left: 0; width: 100%; height: 8px;"></div>
-                          <div class="street" style="top: 70%; left: 0; width: 100%; height: 8px;"></div>
-                          <div class="street" style="top: 0; left: 30%; width: 8px; height: 100%;"></div>
-                          <div class="street" style="top: 0; left: 70%; width: 8px; height: 100%;"></div>
-                          
-                          <!-- Buildings -->
-                          <div class="building" style="top: 10%; left: 10%; width: 15%; height: 15%;"></div>
-                          <div class="building" style="top: 10%; left: 40%; width: 25%; height: 15%;"></div>
-                          <div class="building" style="top: 10%; left: 75%; width: 20%; height: 15%;"></div>
-                          <div class="building" style="top: 45%; left: 10%; width: 15%; height: 20%;"></div>
-                          <div class="building" style="top: 45%; left: 40%; width: 25%; height: 20%;"></div>
-                          <div class="building" style="top: 45%; left: 75%; width: 20%; height: 20%;"></div>
-                          <div class="building" style="top: 80%; left: 10%; width: 15%; height: 15%;"></div>
-                          <div class="building" style="top: 80%; left: 40%; width: 25%; height: 15%;"></div>
-                          <div class="building" style="top: 80%; left: 75%; width: 20%; height: 15%;"></div>
-                          
-                          <!-- User Location -->
-                          <div class="marker user-marker" style="top: 50%; left: 50%;">📍</div>
-                          
-                          <!-- Parking Spots -->
-                          <div class="marker available" style="top: 35%; left: 20%;">P</div>
-                          <div class="marker reserved" style="top: 75%; left: 45%;">P</div>
-                          <div class="marker available" style="top: 25%; left: 80%;">P</div>
-                          <div class="marker occupied" style="top: 85%; left: 25%;">P</div>
-                        </div>
-                      </body>
-                      </html>
-                    `,
+                  provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
+                  initialRegion={{
+                    latitude: 40.4168,
+                    longitude: -3.7038,
+                    latitudeDelta: 0.015,
+                    longitudeDelta: 0.015,
                   }}
-                  javaScriptEnabled={true}
-                  domStorageEnabled={true}
-                  startInLoadingState={true}
-                />
+                  showsUserLocation={true}
+                  showsMyLocationButton={false}
+                  showsCompass={false}
+                  showsScale={false}
+                  mapType="standard"
+                  customMapStyle={colorScheme === 'dark' ? [
+                    {
+                      "featureType": "all",
+                      "stylers": [
+                        { "saturation": -100 },
+                        { "gamma": 0.5 }
+                      ]
+                    }
+                  ] : undefined}
+                >
+                  {/* User Location Marker */}
+                  {location && (
+                    <Marker
+                      coordinate={{
+                        latitude: location.latitude,
+                        longitude: location.longitude,
+                      }}
+                      title="Tu ubicación"
+                      description="Estás aquí"
+                      pinColor={colors.primary}
+                    />
+                  )}
+                  
+                  {/* Parking Spots Markers */}
+                  {filteredSpots.map((spot) => (
+                    <Marker
+                      key={spot.id}
+                      coordinate={{
+                        latitude: spot.latitude,
+                        longitude: spot.longitude,
+                      }}
+                      title={spot.address}
+                      description={`${spot.price} • ${getStatusText(spot.type)} • ${spot.distance}`}
+                      pinColor={getMarkerColor(spot.type, colors)}
+                      onPress={() => handleSpotPress(spot)}
+                    >
+                      <View style={[
+                        styles.customMarker, 
+                        { backgroundColor: getMarkerColor(spot.type, colors) }
+                      ]}>
+                        <ThemedText style={styles.markerText}>P</ThemedText>
+                      </View>
+                    </Marker>
+                  ))}
+                </MapView>
               )}
             </View>
             
             {/* Map Controls */}
             <View style={styles.mapControls}>
               <TouchableOpacity 
-                style={[styles.mapControl, { backgroundColor: colors.background }]}
-                onPress={() => {
-                  if (Platform.OS === 'ios') {
-                    getCurrentLocation();
-                  } else {
-                    Alert.alert('Mi ubicación', 'Centrando en tu ubicación');
-                  }
-                }}
+                style={[styles.mapControl, { backgroundColor: colors.background, borderColor: colors.border }]}
+                onPress={getCurrentLocation}
               >
                 <IconSymbol name="location.fill" size={20} color={colors.primary} />
               </TouchableOpacity>
@@ -560,6 +360,19 @@ function getStatusText(type: ParkingSpot['type']) {
       return 'Ocupada';
     default:
       return 'Desconocido';
+  }
+}
+
+function getMarkerColor(type: ParkingSpot['type'], colors: any) {
+  switch (type) {
+    case 'available':
+      return colors.success; // Verde para disponible
+    case 'reserved':
+      return colors.warning; // Naranja para reservada  
+    case 'occupied':
+      return colors.error;   // Rojo para ocupada
+    default:
+      return colors.primary; // Teal de la app
   }
 }
 
@@ -681,6 +494,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -689,6 +503,29 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 4,
+  },
+  // Custom marker styles
+  customMarker: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  markerText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   // Results section
   resultsSection: {

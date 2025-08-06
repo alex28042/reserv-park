@@ -103,14 +103,14 @@ export default function ReservationsScreen() {
             <TouchableOpacity
               style={[
                 styles.tab,
-                selectedTab === 'active' && { backgroundColor: colors.background }
+                selectedTab === 'active' && { backgroundColor: colors.primary }
               ]}
               onPress={() => setSelectedTab('active')}
             >
               <ThemedText 
                 style={[
                   styles.tabText, 
-                  { color: selectedTab === 'active' ? colors.primary : colors.text }
+                  { color: selectedTab === 'active' ? colors.accent : colors.text }
                 ]}
                 type="defaultSemiBold"
               >
@@ -121,14 +121,14 @@ export default function ReservationsScreen() {
             <TouchableOpacity
               style={[
                 styles.tab,
-                selectedTab === 'completed' && { backgroundColor: colors.background }
+                selectedTab === 'completed' && { backgroundColor: colors.primary }
               ]}
               onPress={() => setSelectedTab('completed')}
             >
               <ThemedText 
                 style={[
                   styles.tabText, 
-                  { color: selectedTab === 'completed' ? colors.primary : colors.text }
+                  { color: selectedTab === 'completed' ? colors.accent : colors.text }
                 ]}
                 type="defaultSemiBold"
               >
