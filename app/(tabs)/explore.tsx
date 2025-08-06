@@ -88,10 +88,23 @@ export default function ExploreScreen() {
     }
   }, [location]);
 
-  const filteredSpots = mockParkingSpots.filter(spot => {
-    if (selectedFilter === 'all') return true;
-    return spot.type === selectedFilter;
-  });
+  const filteredSpots = React.useMemo(() => {
+    if (!mockParkingSpots || !Array.isArray(mockParkingSpots)) {
+      console.warn('🚨 mockParkingSpots no está disponible');
+      return [];
+    }
+    
+    try {
+      return mockParkingSpots.filter(spot => {
+        if (!spot || typeof spot !== 'object') return false;
+        if (selectedFilter === 'all') return true;
+        return spot.type === selectedFilter;
+      });
+    } catch (error) {
+      console.error('🚨 Error filtrando spots:', error);
+      return [];
+    }
+  }, [selectedFilter]);
 
   const handleSpotPress = (spot: ParkingSpot) => {
     // Hacer scroll hacia el mapa para mostrarlo
@@ -388,7 +401,7 @@ export default function ExploreScreen() {
                   )}
                   
                   {/* Parking Spots Markers */}
-                  {filteredSpots.map((spot) => (
+                  {filteredSpots?.length > 0 && filteredSpots.map((spot) => (
                     <Marker
                       key={spot.id}
                       coordinate={{
@@ -447,7 +460,7 @@ export default function ExploreScreen() {
 
           {/* Parking Spots List */}
           <View style={styles.spotsList}>
-        {filteredSpots.map((spot) => (
+            {filteredSpots?.length > 0 ? filteredSpots.map((spot) => (
           <TouchableOpacity
             key={spot.id}
             style={[styles.spotCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
@@ -492,7 +505,17 @@ export default function ExploreScreen() {
                   </View>
             </View>
           </TouchableOpacity>
-        ))}
+            )) : (
+              <View style={styles.emptyState}>
+                <IconSymbol name="car.fill" size={48} color={colors.text} />
+                <ThemedText style={[styles.emptyText, { color: colors.text }]} type="defaultSemiBold">
+                  No hay plazas {selectedFilter === 'all' ? '' : 'disponibles'} en esta zona
+                </ThemedText>
+                <ThemedText style={[styles.emptySubtext, { color: colors.text }]}>
+                  Intenta cambiar el filtro o buscar en otra ubicación
+                </ThemedText>
+              </View>
+            )}
           </View>
         </View>
       </ScrollView>
@@ -501,19 +524,29 @@ export default function ExploreScreen() {
 }
 
 function getStatusColor(type: ParkingSpot['type'], colors: any) {
+  if (!type || !colors) {
+    console.warn('🚨 getStatusColor: parámetros inválidos', { type, colors: !!colors });
+    return '#6366f1'; // Fallback color
+  }
+  
   switch (type) {
     case 'available':
-      return colors.success;
+      return colors.success || '#10b981';
     case 'reserved':
-      return colors.warning;
+      return colors.warning || '#f59e0b';
     case 'occupied':
-      return colors.error;
+      return colors.error || '#ef4444';
     default:
-      return colors.primary;
+      return colors.primary || '#6366f1';
   }
 }
 
 function getStatusText(type: ParkingSpot['type']) {
+  if (!type) {
+    console.warn('🚨 getStatusText: tipo inválido', { type });
+    return 'Desconocido';
+  }
+  
   switch (type) {
     case 'available':
       return 'Disponible';
@@ -527,15 +560,20 @@ function getStatusText(type: ParkingSpot['type']) {
 }
 
 function getMarkerColor(type: ParkingSpot['type'], colors: any) {
+  if (!type || !colors) {
+    console.warn('🚨 getMarkerColor: parámetros inválidos', { type, colors: !!colors });
+    return '#6366f1'; // Fallback color
+  }
+  
   switch (type) {
     case 'available':
-      return colors.success; // Verde para disponible
+      return colors.success || '#10b981'; // Verde para disponible
     case 'reserved':
-      return colors.warning; // Naranja para reservada  
+      return colors.warning || '#f59e0b'; // Naranja para reservada  
     case 'occupied':
-      return colors.error;   // Rojo para ocupada
+      return colors.error || '#ef4444';   // Rojo para ocupada
     default:
-      return colors.primary; // Teal de la app
+      return colors.primary || '#6366f1'; // Teal de la app
   }
 }
 
@@ -1040,6 +1078,24 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
+  },
+  // Empty state
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+  },
+  emptyText: {
+    marginTop: 16,
+    fontSize: 18,
+    textAlign: 'center',
+  },
+  emptySubtext: {
+    marginTop: 8,
+    fontSize: 14,
+    textAlign: 'center',
+    opacity: 0.7,
   },
   // Results section
   resultsSection: {
