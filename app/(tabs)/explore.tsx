@@ -330,15 +330,7 @@ export default function ExploreScreen() {
                   showsCompass={false}
                   showsScale={false}
                   mapType="standard"
-                  customMapStyle={colorScheme === 'dark' ? [
-                    {
-                      "featureType": "all",
-                      "stylers": [
-                        { "saturation": -100 },
-                        { "gamma": 0.5 }
-                      ]
-                    }
-                  ] : undefined}
+                  customMapStyle={colorScheme === 'dark' ? getDarkMapStyle() : undefined}
                 >
                   {/* User Location Marker */}
                   {location && (
@@ -349,8 +341,19 @@ export default function ExploreScreen() {
                       }}
                       title="Tu ubicación"
                       description="Estás aquí"
-                      pinColor={colors.primary}
-                    />
+                    >
+                      <View style={[
+                        styles.userMarker,
+                        { 
+                          backgroundColor: colors.primary,
+                          borderColor: colorScheme === 'dark' ? '#1d2c4d' : '#FFFFFF',
+                          shadowColor: colorScheme === 'dark' ? '#000' : colors.primary,
+                          shadowOpacity: colorScheme === 'dark' ? 0.6 : 0.4,
+                        }
+                      ]}>
+                        <View style={[styles.userMarkerInner, { backgroundColor: colors.accent }]} />
+                      </View>
+                    </Marker>
                   )}
                   
                   {/* Parking Spots Markers */}
@@ -368,9 +371,19 @@ export default function ExploreScreen() {
                     >
                       <View style={[
                         styles.customMarker, 
-                        { backgroundColor: getMarkerColor(spot.type, colors) }
+                        { 
+                          backgroundColor: getMarkerColor(spot.type, colors),
+                          borderColor: colorScheme === 'dark' ? '#1d2c4d' : '#FFFFFF',
+                          shadowColor: colorScheme === 'dark' ? '#000' : '#000',
+                          shadowOpacity: colorScheme === 'dark' ? 0.5 : 0.3,
+                        }
                       ]}>
-                        <ThemedText style={styles.markerText}>P</ThemedText>
+                        <ThemedText style={[styles.markerText, {
+                          color: colorScheme === 'dark' ? '#FFFFFF' : '#FFFFFF',
+                          textShadowColor: colorScheme === 'dark' ? '#000' : 'rgba(0,0,0,0.3)',
+                          textShadowOffset: { width: 1, height: 1 },
+                          textShadowRadius: 2,
+                        }]}>P</ThemedText>
                       </View>
                     </Marker>
                   ))}
@@ -493,6 +506,242 @@ function getMarkerColor(type: ParkingSpot['type'], colors: any) {
     default:
       return colors.primary; // Teal de la app
   }
+}
+
+function getDarkMapStyle() {
+  return [
+    {
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#1d2c4d"
+        }
+      ]
+    },
+    {
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#8ec3b9"
+        }
+      ]
+    },
+    {
+      "elementType": "labels.text.stroke",
+      "stylers": [
+        {
+          "color": "#1a3646"
+        }
+      ]
+    },
+    {
+      "featureType": "administrative.country",
+      "elementType": "geometry.stroke",
+      "stylers": [
+        {
+          "color": "#4b6878"
+        }
+      ]
+    },
+    {
+      "featureType": "administrative.land_parcel",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#64779f"
+        }
+      ]
+    },
+    {
+      "featureType": "administrative.province",
+      "elementType": "geometry.stroke",
+      "stylers": [
+        {
+          "color": "#4b6878"
+        }
+      ]
+    },
+    {
+      "featureType": "landscape.man_made",
+      "elementType": "geometry.stroke",
+      "stylers": [
+        {
+          "color": "#334e87"
+        }
+      ]
+    },
+    {
+      "featureType": "landscape.natural",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#023e58"
+        }
+      ]
+    },
+    {
+      "featureType": "poi",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#283d6a"
+        }
+      ]
+    },
+    {
+      "featureType": "poi",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#6f9ba4"
+        }
+      ]
+    },
+    {
+      "featureType": "poi",
+      "elementType": "labels.text.stroke",
+      "stylers": [
+        {
+          "color": "#1d2c4d"
+        }
+      ]
+    },
+    {
+      "featureType": "poi.park",
+      "elementType": "geometry.fill",
+      "stylers": [
+        {
+          "color": "#3A7A6B"
+        }
+      ]
+    },
+    {
+      "featureType": "poi.park",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#6CB89A"
+        }
+      ]
+    },
+    {
+      "featureType": "road",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#304a7d"
+        }
+      ]
+    },
+    {
+      "featureType": "road",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#98a5be"
+        }
+      ]
+    },
+    {
+      "featureType": "road",
+      "elementType": "labels.text.stroke",
+      "stylers": [
+        {
+          "color": "#1d2c4d"
+        }
+      ]
+    },
+    {
+      "featureType": "road.highway",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#2c6675"
+        }
+      ]
+    },
+    {
+      "featureType": "road.highway",
+      "elementType": "geometry.stroke",
+      "stylers": [
+        {
+          "color": "#255763"
+        }
+      ]
+    },
+    {
+      "featureType": "road.highway",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#b0d5ce"
+        }
+      ]
+    },
+    {
+      "featureType": "road.highway",
+      "elementType": "labels.text.stroke",
+      "stylers": [
+        {
+          "color": "#023e58"
+        }
+      ]
+    },
+    {
+      "featureType": "transit",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#98a5be"
+        }
+      ]
+    },
+    {
+      "featureType": "transit",
+      "elementType": "labels.text.stroke",
+      "stylers": [
+        {
+          "color": "#1d2c4d"
+        }
+      ]
+    },
+    {
+      "featureType": "transit.line",
+      "elementType": "geometry.fill",
+      "stylers": [
+        {
+          "color": "#283d6a"
+        }
+      ]
+    },
+    {
+      "featureType": "transit.station",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#3a4762"
+        }
+      ]
+    },
+    {
+      "featureType": "water",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#0e1626"
+        }
+      ]
+    },
+    {
+      "featureType": "water",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#4e6d70"
+        }
+      ]
+    }
+  ];
 }
 
 
@@ -662,6 +911,26 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: 'bold',
+  },
+  // User marker styles
+  userMarker: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 4,
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  userMarkerInner: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   // Results section
   resultsSection: {
