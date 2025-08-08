@@ -2,9 +2,15 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import React from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
+
+// Initialize mock auth once at module load to avoid hook ordering issues
+if ((global as any).__mockAuth === undefined) {
+  (global as any).__mockAuth = false;
+}
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();

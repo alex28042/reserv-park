@@ -245,7 +245,7 @@ export default function ProfileScreen() {
                 '¿Estás seguro de que quieres cerrar sesión?',
                 [
                   { text: 'Cancelar', style: 'cancel' },
-                  { text: 'Cerrar Sesión', style: 'destructive' }
+                  { text: 'Cerrar Sesión', style: 'destructive', onPress: () => { (global as any).__mockAuth = false; require('expo-router').router.replace('/welcome'); } }
                 ]
               )}
             />

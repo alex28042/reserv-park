@@ -60,29 +60,29 @@ export default function WelcomeScreen() {
       </Animated.View>
 
       <Animated.View style={[styles.content, { opacity: contentOpacity }]}> 
-        <View style={styles.bottomCard}>
+        <View style={styles.headerArea}>
           <Animated.Image
             source={require('../assets/images/reservpark-logo.jpeg')}
-            style={[styles.miniLogo, { transform: [{ translateY: miniLogoTranslateY }] }]}
+            style={[styles.miniLogoTop, { transform: [{ translateY: miniLogoTranslateY }] }]}
             resizeMode="contain"
           />
-          <Text style={[styles.title, { color: colors.accent }]}>ReservPark</Text>
-          <Text style={[styles.subtitle, { color: colors.accent }]}>Encuentra y ofrece plazas fácilmente</Text>
-
-          <Animated.View style={[styles.actions, { opacity: buttonsOpacity }]}> 
-            <Link href="/login" asChild>
-              <TouchableOpacity style={[styles.ctaButton, styles.primaryButton]}> 
-                <Text style={[styles.ctaText, styles.primaryText]}>Iniciar sesión</Text>
-              </TouchableOpacity>
-            </Link>
-
-            <Link href="/register" asChild>
-              <TouchableOpacity style={[styles.ctaButton, styles.secondaryButton]}> 
-                <Text style={[styles.ctaText, styles.secondaryText]}>Registrarse</Text>
-              </TouchableOpacity>
-            </Link>
-          </Animated.View>
         </View>
+
+        <Animated.View style={[styles.actionsArea, { opacity: buttonsOpacity }]}> 
+          <Link href="/login" asChild>
+            <TouchableOpacity style={[styles.ctaButton, styles.whiteButton]}> 
+              <Text style={[styles.ctaText, styles.darkText]}>Iniciar sesión</Text>
+            </TouchableOpacity>
+          </Link>
+
+          <Link href="/register" asChild>
+            <TouchableOpacity style={[styles.ctaButton, styles.whiteButton]}> 
+              <Text style={[styles.ctaText, styles.darkText]}>Crear nueva cuenta</Text>
+            </TouchableOpacity>
+          </Link>
+
+          <Text style={styles.footerText}>La forma inteligente de aparcar</Text>
+        </Animated.View>
       </Animated.View>
     </SafeAreaView>
   );
@@ -103,41 +103,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-between',
   },
-  fullLogoContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   fullLogo: {
     width: '80%',
     height: '80%',
   },
-  bottomCard: {
-    width: '100%',
-    paddingHorizontal: 24,
-    paddingBottom: 36,
-    paddingTop: 12,
-    alignItems: 'center',
-    gap: 8,
-  },
-  miniLogo: {
-    width: 120,
-    height: 60,
-    marginBottom: 8,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
-  subtitle: {
-    fontSize: 14,
-  },
-  actions: {
-    marginTop: 16,
-    width: '100%',
-    gap: 12,
-  },
+  headerArea: { flex: 1, alignItems: 'center', justifyContent: 'flex-end', paddingTop: 24 },
+  miniLogoTop: { width: 180, height: 90, marginBottom: 12 },
+  actionsArea: { paddingHorizontal: 24, paddingBottom: 36, gap: 12 },
   ctaButton: {
     width: '100%',
     paddingVertical: 14,
@@ -145,25 +117,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
   },
-  primaryButton: {
-    backgroundColor: '#ffffff',
-    borderColor: '#E5E7EB',
-  },
-  primaryText: {
-    color: '#111827',
-  },
-  secondaryButton: {
-    backgroundColor: '#ffffff',
-    borderColor: '#E5E7EB',
-  },
-  secondaryText: {
-    color: '#111827',
-  },
+  whiteButton: { backgroundColor: '#FFFFFF', borderColor: '#E5E7EB' },
+  darkText: { color: '#111827' },
   ctaText: {
     fontSize: 16,
     fontWeight: '700',
     textAlign: 'center',
   },
+  footerText: { textAlign: 'center', color: '#E6F2EE', marginTop: 8 },
 });
 
 
