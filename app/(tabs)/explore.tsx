@@ -22,6 +22,23 @@ interface ParkingSpot {
   distance: string;
   latitude: number;
   longitude: number;
+  // Offer-specific fields
+  isOffer?: boolean;
+  availableInMinutes?: number; // minutes until becomes available
+  offerAvailableAt?: number; // timestamp ms
+  offerExpiresAt?: number; // timestamp ms
+}
+
+function isRenderableSpot(spot: any): spot is ParkingSpot {
+  return (
+    spot &&
+    typeof spot.id === 'string' &&
+    typeof spot.address === 'string' &&
+    typeof spot.price === 'string' &&
+    typeof spot.type === 'string' &&
+    Number.isFinite(spot.latitude) &&
+    Number.isFinite(spot.longitude)
+  );
 }
 
 const initialSpots: ParkingSpot[] = [
@@ -97,6 +114,7 @@ export default function ExploreScreen() {
     longitude?: number;
   } | null>(null);
   const [offerModalVisible, setOfferModalVisible] = useState(false);
+  const LEAVING_SOON_MINUTES = 30;
   
   const getToggleIcon = (): 'funnel.fill' | 'map.fill' => {
     return mapView ? 'funnel.fill' : 'map.fill';
@@ -122,16 +140,21 @@ export default function ExploreScreen() {
     }
     
     try {
-      return spots.filter(spot => {
-        if (!spot || typeof spot !== 'object') return false;
-    if (selectedFilter === 'all') return true;
-    return spot.type === selectedFilter;
-  });
+      return spots.filter((spot) => {
+        if (!isRenderableSpot(spot)) return false;
+        if (selectedFilter === 'all') return true;
+        // Disponibles: las libres ahora o las ofertas que se liberan en <= X minutos
+        const isAvailableNow = spot.type === 'available';
+        const isLeavingSoon = Boolean(
+          spot.isOffer && typeof spot.availableInMinutes === 'number' && spot.availableInMinutes <= LEAVING_SOON_MINUTES
+        );
+        return isAvailableNow || isLeavingSoon;
+      });
     } catch (error) {
       console.error('🚨 Error filtrando spots:', error);
       return [];
     }
-  }, [selectedFilter]);
+  }, [selectedFilter, spots]);
 
   const handleSpotPress = (spot: ParkingSpot) => {
     setActiveSpotId(spot.id);
@@ -267,20 +290,39 @@ export default function ExploreScreen() {
     // Create a new spot at current user location (or map center if available)
     const lat = location?.latitude || currentRegion?.latitude || 40.4168;
     const lon = location?.longitude || currentRegion?.longitude || -3.7038;
+    const now = Date.now();
+    const availableInMinutes = Math.max(0, payload.leaveInMinutes);
+    const availableAt = now + availableInMinutes * 60 * 1000;
+    const expiresAt = now + payload.offerDurationMinutes * 60 * 1000;
     const newSpot: ParkingSpot = {
       id: `${Date.now()}`,
-      type: 'available',
+      type: availableInMinutes > 0 ? 'occupied' : 'available',
       address: payload.address || 'Plaza ofrecida por usuario',
       price: `€${payload.price.toFixed(2)}/hora`,
-      timeLeft: `${payload.leaveInMinutes} min (se va) • oferta ${Math.round(payload.offerDurationMinutes/60)}h`,
+      timeLeft:
+        availableInMinutes > 0
+          ? `Disponible en ${availableInMinutes} min`
+          : 'Disponible ahora',
       distance: '0.1 km',
       latitude: lat,
       longitude: lon,
+      isOffer: true,
+      availableInMinutes,
+      offerAvailableAt: availableAt,
+      offerExpiresAt: expiresAt,
     };
     setSpots((prev) => [newSpot, ...prev]);
     setOfferModalVisible(false);
     // Centrar el mapa en la nueva plaza sin abrir modales
     setTimeout(() => {
+      // Mostrar el mapa y llevar el scroll arriba
+      setMapView(true);
+      scrollRef.current?.scrollTo?.({ y: 0, animated: true });
+      setActiveSpotId(newSpot.id);
+      // Asegurar que el filtro permita ver la oferta recién creada
+      if (newSpot.type !== 'available' && !(newSpot.isOffer && (newSpot.availableInMinutes ?? 9999) <= LEAVING_SOON_MINUTES)) {
+        setSelectedFilter('all');
+      }
       mapRef.current?.animateToRegion(
         {
           latitude: lat,
@@ -292,6 +334,41 @@ export default function ExploreScreen() {
       );
     }, 100);
   };
+
+  // Tick offers to update countdown and availability/expiry
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSpots((prev) => {
+        const now = Date.now();
+        const updated: ParkingSpot[] = [];
+        for (const s of prev) {
+          if (!s.isOffer) {
+            updated.push(s);
+            continue;
+          }
+          // drop if expired
+          if (s.offerExpiresAt && now >= s.offerExpiresAt) {
+            continue;
+          }
+          let next = { ...s } as ParkingSpot;
+          if (s.offerAvailableAt) {
+            const minutes = Math.max(0, Math.ceil((s.offerAvailableAt - now) / 60000));
+            next.availableInMinutes = minutes;
+            if (minutes <= 0) {
+              next.type = 'available';
+              next.timeLeft = 'Disponible ahora';
+            } else {
+              next.type = 'occupied';
+              next.timeLeft = `Disponible en ${minutes} min`;
+            }
+          }
+          updated.push(next);
+        }
+        return updated;
+      });
+    }, 30000); // update every 30s
+    return () => clearInterval(interval);
+  }, []);
 
   const handleMarkerPress = (spot: ParkingSpot) => {
     setActiveSpotId(spot.id);
@@ -540,15 +617,15 @@ export default function ExploreScreen() {
                   )}
                   
                   {/* Parking Spots Markers */}
-                  {filteredSpots?.length > 0 && filteredSpots.map((spot) => (
+                  {Array.isArray(filteredSpots) && filteredSpots.length > 0 && filteredSpots.map((spot) => (
                     <Marker
                       key={spot.id}
                       coordinate={{
-                        latitude: spot.latitude,
-                        longitude: spot.longitude,
+                        latitude: Number.isFinite(spot.latitude) ? spot.latitude : 0,
+                        longitude: Number.isFinite(spot.longitude) ? spot.longitude : 0,
                       }}
                       title={spot.address}
-                      description={`${spot.price} • ${getStatusText(spot.type)} • ${spot.distance}`}
+                      description={`${spot.price} • ${spot.timeLeft} • ${spot.distance}`}
                       onPress={() => handleMarkerPress(spot)}
                     >
                       <View style={styles.priceMarkerContainer}>
@@ -569,7 +646,9 @@ export default function ExploreScreen() {
                               { color: activeSpotId === spot.id ? colors.accent : '#111827' },
                             ]}
                           >
-                            {formatPriceLabel(spot.price)}
+                            {spot.isOffer && typeof spot.availableInMinutes === 'number' && spot.availableInMinutes > 0
+                              ? `${spot.availableInMinutes}m`
+                              : formatPriceLabel(spot.price)}
                           </ThemedText>
                         </View>
                         <View
@@ -767,12 +846,12 @@ export default function ExploreScreen() {
               )}
 
               {/* Parking spots */}
-              {filteredSpots?.length > 0 && filteredSpots.map((spot) => (
+              {Array.isArray(filteredSpots) && filteredSpots.length > 0 && filteredSpots.map((spot) => (
                 <Marker
                   key={spot.id}
                   coordinate={{ latitude: spot.latitude, longitude: spot.longitude }}
                   title={spot.address}
-                  description={`${spot.price} • ${getStatusText(spot.type)} • ${spot.distance}`}
+                  description={`${spot.price} • ${spot.timeLeft} • ${spot.distance}`}
                   onPress={() => handleMarkerPress(spot)}
                 >
                   <View style={styles.priceMarkerContainer}>
@@ -791,7 +870,9 @@ export default function ExploreScreen() {
                           { color: activeSpotId === spot.id ? colors.accent : '#111827' },
                         ]}
                       >
-                        {formatPriceLabel(spot.price)}
+                        {spot.isOffer && spot.availableInMinutes && spot.availableInMinutes > 0
+                          ? `${spot.availableInMinutes}m`
+                          : formatPriceLabel(spot.price)}
                       </ThemedText>
                     </View>
                     <View
