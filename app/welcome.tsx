@@ -89,7 +89,7 @@ export default function WelcomeScreen() {
             </View>
           </TouchableOpacity>
 
-          <Text style={styles.footerText}>La forma inteligente de aparcar</Text>
+          <Text style={styles.footerText}>© 2025 ReservPark · Todos los derechos reservados</Text>
         </Animated.View>
       </Animated.View>
     </SafeAreaView>
@@ -117,33 +117,34 @@ const styles = StyleSheet.create({
     width: '80%',
     height: '80%',
   },
-  headerArea: { alignItems: 'center', justifyContent: 'flex-start', paddingTop: 96, width: '100%' },
-  miniLogoTop: { width: 320, height: 160, marginBottom: 28 },
-  actionsArea: { width: '100%', paddingHorizontal: 24, paddingBottom: 48, gap: 16, marginTop: 24 },
+  headerArea: { alignItems: 'center', justifyContent: 'flex-start', paddingTop: 96, width: '100%', maxWidth: 520, alignSelf: 'center' },
+  miniLogoTop: { width: 380, height: 190, marginBottom: 32 },
+  actionsArea: { width: '100%', maxWidth: 520, alignSelf: 'center', paddingHorizontal: 24, paddingBottom: 48, gap: 14, marginTop: 24 },
   ctaButton: {
     width: '100%',
   },
   buttonInner: {
     width: '100%',
-    paddingVertical: 16,
-    borderRadius: 24,
+    height: 52,
+    borderRadius: 20,
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#E5E7EB',
     shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
     elevation: 3,
+    justifyContent: 'center',
   },
   darkText: { color: '#111827' },
   ctaText: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
     textAlign: 'center',
   },
-  footerText: { textAlign: 'center', color: '#E6F2EE', marginTop: 8 },
+  footerText: { textAlign: 'center', color: '#E6F2EE', marginTop: 14, fontSize: 12, opacity: 0.9 },
 });
 
 

@@ -1,3 +1,4 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -25,10 +26,16 @@ export default function LoginScreen() {
         <View style={styles.divider}><Text style={styles.dividerText}>o continúa con</Text></View>
 
         <TouchableOpacity style={[styles.submit, styles.google]} onPress={() => onSuccess('Login con Google OK')}>
-          <Text style={[styles.submitText, { color: '#111827' }]}>Google</Text>
+          <View style={styles.buttonContent}>
+            <Ionicons name="logo-google" size={20} color="#111827" style={{ marginRight: 8 }} />
+            <Text style={[styles.submitText, styles.darkText]}>Google</Text>
+          </View>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.submit, styles.apple]} onPress={() => onSuccess('Login con Apple OK')}>
-          <Text style={styles.submitText}>Apple</Text>
+          <View style={styles.buttonContent}>
+            <Ionicons name="logo-apple" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
+            <Text style={styles.submitText}>Apple</Text>
+          </View>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -37,17 +44,19 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#003346' },
-  header: { padding: 24 },
-  headerText: { color: '#E6F2EE', fontSize: 20, fontWeight: '800' },
-  form: { flex: 1, paddingHorizontal: 24, gap: 12 },
-  input: { backgroundColor: '#FFFFFF', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, borderWidth: 1, borderColor: '#E5E7EB' },
-  submit: { paddingVertical: 14, borderRadius: 12, alignItems: 'center' },
+  header: { paddingHorizontal: 24, paddingTop: 12, paddingBottom: 8 },
+  headerText: { color: '#E6F2EE', fontSize: 22, fontWeight: '800' },
+  form: { flex: 1, paddingHorizontal: 24, gap: 12, maxWidth: 520, alignSelf: 'center', width: '100%' },
+  input: { backgroundColor: '#FFFFFF', borderRadius: 14, paddingHorizontal: 14, paddingVertical: 12, borderWidth: 1, borderColor: '#E5E7EB' },
+  submit: { height: 52, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   primary: { backgroundColor: '#0EA5E9' },
   google: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E5E7EB' },
   apple: { backgroundColor: '#111827' },
   submitText: { color: '#FFFFFF', fontWeight: '700' },
+  darkText: { color: '#111827' },
   divider: { alignItems: 'center', marginVertical: 8 },
   dividerText: { color: '#E6F2EE' },
+  buttonContent: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
 });
 
 
