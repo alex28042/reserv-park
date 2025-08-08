@@ -2,11 +2,11 @@ import { ThemedText } from '@/components/ThemedText';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { indexStyles as styles } from '@/styles/index.styles';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, ScrollView, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { indexStyles as styles } from './index.styles';
 
 export default function HomeScreen() {
   const colorScheme = useColorScheme();

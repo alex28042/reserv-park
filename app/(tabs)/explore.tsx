@@ -11,7 +11,7 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useLocation } from '@/hooks/useLocation';
-import { exploreStyles as styles } from './explore.styles';
+import { exploreStyles as styles } from '@/styles/explore.styles';
 
 interface ParkingSpot {
   id: string;

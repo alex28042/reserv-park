@@ -441,3 +441,5 @@ export const indexStyles = StyleSheet.create({
     opacity: 0.6,
   },
 });
+
+

@@ -7,7 +7,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { reservationsStyles as styles } from './reservations.styles';
+import { reservationsStyles as styles } from '@/styles/reservations.styles';
 
 interface Reservation {
   id: string;

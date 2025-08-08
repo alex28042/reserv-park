@@ -39,13 +39,18 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
+          "image": "./assets/images/reservpark-logo.jpeg",
+          "imageWidth": 320,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#003346"
         }
       ]
     ],
+    "splash": {
+      "image": "./assets/images/reservpark-logo.jpeg",
+      "resizeMode": "contain",
+      "backgroundColor": "#003346"
+    },
     "experiments": {
       "typedRoutes": true
     },
