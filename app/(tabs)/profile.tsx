@@ -159,23 +159,28 @@ export default function ProfileScreen() {
             Tu actividad
           </ThemedText>
           
-          <View style={[styles.statsCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <View style={styles.statsRow}>
-              <View style={styles.statItem}>
-                <ThemedText style={[styles.statValue, { color: colors.primary }]} type="defaultSemiBold">
-                  €47
-                </ThemedText>
-                <ThemedText style={[styles.statLabel, { color: colors.text }]}>
-                  Ahorrado este mes
-                </ThemedText>
+          <View style={[styles.statsCard, { backgroundColor: colors.surface, borderColor: colors.border }]}> 
+            <View style={styles.statsGrid}> 
+              <View style={[styles.statTile, { borderColor: colors.border }]}> 
+                <View style={[styles.statTileIcon, { backgroundColor: colors.primary }]}> 
+                  <IconSymbol name="eurosign" size={14} color={colors.accent} />
+                </View>
+                <ThemedText style={[styles.tileValue, { color: colors.primary }]} type="defaultSemiBold">€47</ThemedText>
+                <ThemedText style={[styles.tileLabel, { color: colors.text }]}>Ahorrado este mes</ThemedText>
               </View>
-              <View style={styles.statItem}>
-                <ThemedText style={[styles.statValue, { color: colors.primary }]} type="defaultSemiBold">
-                  8
-                </ThemedText>
-                <ThemedText style={[styles.statLabel, { color: colors.text }]}>
-                  Plazas compartidas
-                </ThemedText>
+              <View style={[styles.statTile, { borderColor: colors.border }]}> 
+                <View style={[styles.statTileIcon, { backgroundColor: colors.primary }]}> 
+                  <IconSymbol name="car.fill" size={14} color={colors.accent} />
+                </View>
+                <ThemedText style={[styles.tileValue, { color: colors.primary }]} type="defaultSemiBold">8</ThemedText>
+                <ThemedText style={[styles.tileLabel, { color: colors.text }]}>Plazas compartidas</ThemedText>
+              </View>
+              <View style={[styles.statTile, { borderColor: colors.border }]}> 
+                <View style={[styles.statTileIcon, { backgroundColor: colors.primary }]}> 
+                  <IconSymbol name="clock.fill" size={14} color={colors.accent} />
+                </View>
+                <ThemedText style={[styles.tileValue, { color: colors.primary }]} type="defaultSemiBold">1h 20m</ThemedText>
+                <ThemedText style={[styles.tileLabel, { color: colors.text }]}>Tiempo ahorrado</ThemedText>
               </View>
             </View>
           </View>
@@ -532,13 +537,50 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   statsCard: {
-    padding: 20,
+    padding: 16,
     borderRadius: 16,
     borderWidth: 1,
   },
-  statsRow: {
+  statsGrid: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    alignItems: 'stretch',
+    gap: 12,
+  },
+  statTile: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 96,
+    gap: 6,
+  },
+  statTileIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 2,
+  },
+  tileValue: {
+    fontSize: 20,
+    lineHeight: 24,
+    textAlign: 'center',
+  },
+  tileLabel: {
+    fontSize: 12,
+    opacity: 0.7,
+    textAlign: 'center',
+    lineHeight: 16,
+    paddingHorizontal: 4,
+  },
+  activityStatItem: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 6,
   },
   statValue: {
     fontSize: 24,

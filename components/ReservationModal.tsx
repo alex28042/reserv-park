@@ -2,10 +2,10 @@ import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import React, { useState } from 'react';
 import {
-    Modal,
-    ScrollView,
-    TouchableOpacity,
-    View
+  Modal,
+  ScrollView,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { reservationModalStyles as styles } from './ReservationModal.styles';
 import { ThemedText } from './ThemedText';
