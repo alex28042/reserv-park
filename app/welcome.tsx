@@ -1,5 +1,5 @@
 import { Colors } from '@/constants/Colors';
-import { Link } from 'expo-router';
+import { router } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
 import { Animated, Easing, Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
 
@@ -69,17 +69,25 @@ export default function WelcomeScreen() {
         </View>
 
         <Animated.View style={[styles.actionsArea, { opacity: buttonsOpacity }]}> 
-          <Link href="/login" asChild>
-            <TouchableOpacity style={[styles.ctaButton, styles.whiteButton]}> 
+          <TouchableOpacity
+            onPress={() => router.push('/login')}
+            activeOpacity={0.85}
+            style={styles.ctaButton}
+          >
+            <View style={styles.buttonInner}>
               <Text style={[styles.ctaText, styles.darkText]}>Iniciar sesión</Text>
-            </TouchableOpacity>
-          </Link>
+            </View>
+          </TouchableOpacity>
 
-          <Link href="/register" asChild>
-            <TouchableOpacity style={[styles.ctaButton, styles.whiteButton]}> 
+          <TouchableOpacity
+            onPress={() => router.push('/register')}
+            activeOpacity={0.85}
+            style={styles.ctaButton}
+          >
+            <View style={styles.buttonInner}>
               <Text style={[styles.ctaText, styles.darkText]}>Crear nueva cuenta</Text>
-            </TouchableOpacity>
-          </Link>
+            </View>
+          </TouchableOpacity>
 
           <Text style={styles.footerText}>La forma inteligente de aparcar</Text>
         </Animated.View>
@@ -91,7 +99,8 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
@@ -101,23 +110,33 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
   },
   fullLogo: {
     width: '80%',
     height: '80%',
   },
-  headerArea: { flex: 1, alignItems: 'center', justifyContent: 'flex-end', paddingTop: 24 },
-  miniLogoTop: { width: 180, height: 90, marginBottom: 12 },
-  actionsArea: { paddingHorizontal: 24, paddingBottom: 36, gap: 12 },
+  headerArea: { alignItems: 'center', justifyContent: 'flex-start', paddingTop: 96, width: '100%' },
+  miniLogoTop: { width: 320, height: 160, marginBottom: 28 },
+  actionsArea: { width: '100%', paddingHorizontal: 24, paddingBottom: 48, gap: 16, marginTop: 24 },
   ctaButton: {
     width: '100%',
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 1,
   },
-  whiteButton: { backgroundColor: '#FFFFFF', borderColor: '#E5E7EB' },
+  buttonInner: {
+    width: '100%',
+    paddingVertical: 16,
+    borderRadius: 24,
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 3,
+  },
   darkText: { color: '#111827' },
   ctaText: {
     fontSize: 16,
