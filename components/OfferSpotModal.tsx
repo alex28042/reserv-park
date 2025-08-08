@@ -13,6 +13,8 @@ export interface OfferSpotPayload {
   price: number;
   leaveInMinutes: number; // En cuánto tiempo te vas
   offerDurationMinutes: number; // Cuánto tiempo durará la oferta
+  latitude?: number;
+  longitude?: number;
 }
 
 interface OfferSpotModalProps {
@@ -27,6 +29,7 @@ export function OfferSpotModal({ visible, onClose, onSubmit }: OfferSpotModalPro
   const { location, getCurrentLocation, requestPermission } = useLocation();
 
   const [address, setAddress] = useState('');
+  const [pickedCoords, setPickedCoords] = useState<{ latitude: number; longitude: number } | null>(null);
   const [price, setPrice] = useState('2.50');
   const [leaveInMinutes, setLeaveInMinutes] = useState(10);
   const [durationOption, setDurationOption] = useState<'1h' | '2h' | 'custom'>('1h');
@@ -54,12 +57,28 @@ export function OfferSpotModal({ visible, onClose, onSubmit }: OfferSpotModalPro
     );
   }, [price, location, computedOfferMinutes, address]);
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     const numeric = Number(price.replace(',', '.'));
     if (Number.isNaN(numeric) || numeric <= 0) return;
-    onSubmit({ address: address.trim() || undefined, price: numeric, leaveInMinutes, offerDurationMinutes: computedOfferMinutes });
+    let coords = pickedCoords;
+    try {
+      // Intentar geocodificar la dirección para obtener coordenadas precisas
+      const results = await ExpoLocation.geocodeAsync(address);
+      if (results && results.length > 0) {
+        coords = { latitude: results[0].latitude, longitude: results[0].longitude };
+      }
+    } catch {}
+    onSubmit({
+      address: address.trim() || undefined,
+      price: numeric,
+      leaveInMinutes,
+      offerDurationMinutes: computedOfferMinutes,
+      latitude: coords?.latitude,
+      longitude: coords?.longitude,
+    });
     // reset
     setAddress('');
+    setPickedCoords(null);
     setPrice('2.50');
     setLeaveInMinutes(10);
     setDurationOption('1h');
@@ -112,6 +131,7 @@ export function OfferSpotModal({ visible, onClose, onSubmit }: OfferSpotModalPro
                       const city = a.city || a.district || '';
                       const formatted = `${[street, number].filter(Boolean).join(' ')}${city ? `, ${city}` : ''}`.trim();
                       if (formatted.length > 0) setAddress(formatted);
+                      setPickedCoords({ latitude: lat, longitude: lon });
                     }
                   }
                 } catch {}
