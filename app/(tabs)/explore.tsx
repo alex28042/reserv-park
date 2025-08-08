@@ -3,6 +3,7 @@ import { ActivityIndicator, Alert, Linking, Modal, Platform, ScrollView, TextInp
 import MapView, { Marker, PROVIDER_GOOGLE, Region } from 'react-native-maps';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { OfferSpotModal, OfferSpotPayload } from '@/components/OfferSpotModal';
 import { ReservationDetails } from '@/components/ReservationDetails';
 import { ReservationModal } from '@/components/ReservationModal';
 import { ThemedText } from '@/components/ThemedText';
@@ -23,7 +24,7 @@ interface ParkingSpot {
   longitude: number;
 }
 
-const mockParkingSpots: ParkingSpot[] = [
+const initialSpots: ParkingSpot[] = [
   {
     id: '1',
     type: 'available',
@@ -71,6 +72,7 @@ export default function ExploreScreen() {
   const colors = Colors[colorScheme ?? 'light'];
   const insets = useSafeAreaInsets();
   const [selectedFilter, setSelectedFilter] = useState<'available' | 'all'>('available');
+  const [spots, setSpots] = useState<ParkingSpot[]>(initialSpots);
   const [mapView, setMapView] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
@@ -94,6 +96,7 @@ export default function ExploreScreen() {
     latitude?: number;
     longitude?: number;
   } | null>(null);
+  const [offerModalVisible, setOfferModalVisible] = useState(false);
   
   const getToggleIcon = (): 'funnel.fill' | 'map.fill' => {
     return mapView ? 'funnel.fill' : 'map.fill';
@@ -113,13 +116,13 @@ export default function ExploreScreen() {
   }, [location]);
 
   const filteredSpots = React.useMemo(() => {
-    if (!mockParkingSpots || !Array.isArray(mockParkingSpots)) {
+    if (!spots || !Array.isArray(spots)) {
       console.warn('🚨 mockParkingSpots no está disponible');
       return [];
     }
     
     try {
-      return mockParkingSpots.filter(spot => {
+      return spots.filter(spot => {
         if (!spot || typeof spot !== 'object') return false;
     if (selectedFilter === 'all') return true;
     return spot.type === selectedFilter;
@@ -176,7 +179,7 @@ export default function ExploreScreen() {
   };
 
   const nearbySuggestions = React.useMemo(() => {
-    const source = mockParkingSpots.filter((s) => s.type === 'available');
+    const source = spots.filter((s) => s.type === 'available');
     const text = searchQuery.trim().toLowerCase();
     const filtered = text
       ? source.filter((s) => s.address.toLowerCase().includes(text))
@@ -208,7 +211,7 @@ export default function ExploreScreen() {
       .sort((a, b) => a.distanceMeters - b.distanceMeters)
       .slice(0, 8);
     return items;
-  }, [location, searchQuery]);
+  }, [location, searchQuery, spots]);
 
   const goToSuggestion = (sug: { latitude: number; longitude: number; title: string }) => {
     setSearchQuery(sug.title);
@@ -259,6 +262,36 @@ export default function ExploreScreen() {
 
   const zoomIn = () => zoom(0.5);
   const zoomOut = () => zoom(2);
+
+  const handleOfferSubmit = (payload: OfferSpotPayload) => {
+    // Create a new spot at current user location (or map center if available)
+    const lat = location?.latitude || currentRegion?.latitude || 40.4168;
+    const lon = location?.longitude || currentRegion?.longitude || -3.7038;
+    const newSpot: ParkingSpot = {
+      id: `${Date.now()}`,
+      type: 'available',
+      address: payload.address || 'Plaza ofrecida por usuario',
+      price: `€${payload.price.toFixed(2)}/hora`,
+      timeLeft: `${payload.leaveInMinutes} min (se va) • oferta ${Math.round(payload.offerDurationMinutes/60)}h`,
+      distance: '0.1 km',
+      latitude: lat,
+      longitude: lon,
+    };
+    setSpots((prev) => [newSpot, ...prev]);
+    setOfferModalVisible(false);
+    // Centrar el mapa en la nueva plaza sin abrir modales
+    setTimeout(() => {
+      mapRef.current?.animateToRegion(
+        {
+          latitude: lat,
+          longitude: lon,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        },
+        500
+      );
+    }, 100);
+  };
 
   const handleMarkerPress = (spot: ParkingSpot) => {
     setActiveSpotId(spot.id);
@@ -585,6 +618,21 @@ export default function ExploreScreen() {
           </View>
         )}
 
+        {/* Botón debajo del mapa para ofrecer plaza */}
+        {mapView && (
+          <View style={styles.belowMapActions}>
+            <TouchableOpacity
+              style={[styles.offerButton, { backgroundColor: colors.primary }]}
+              onPress={() => setOfferModalVisible(true)}
+            >
+              <IconSymbol name="plus" size={18} color={colors.accent} />
+              <ThemedText style={[styles.offerButtonText, { color: colors.accent }]} type="defaultSemiBold">
+                Ofrecer mi plaza
+              </ThemedText>
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* Results Section */}
         <View style={styles.resultsSection}>
           <View style={styles.resultsHeader}>
@@ -671,6 +719,13 @@ export default function ExploreScreen() {
         visible={reservationDetailsVisible}
         reservation={reservationDetailsData as any}
         onBack={() => setReservationDetailsVisible(false)}
+      />
+
+      {/* Offer Spot Modal */}
+      <OfferSpotModal
+        visible={offerModalVisible}
+        onClose={() => setOfferModalVisible(false)}
+        onSubmit={handleOfferSubmit}
       />
 
       {/* Fullscreen Map Modal */}

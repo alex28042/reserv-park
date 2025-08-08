@@ -146,6 +146,25 @@ export const exploreStyles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
+
+  // Below map primary action
+  belowMapActions: {
+    paddingHorizontal: 20,
+    marginTop: -8,
+    marginBottom: 16,
+  },
+  offerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 8,
+  },
+  offerButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
   
   // Custom marker styles
   // Airbnb-like price marker

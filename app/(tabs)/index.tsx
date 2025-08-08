@@ -151,17 +151,30 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          {/* CTA Banner */}
-          <TouchableOpacity 
-            style={[styles.ctaBanner, { backgroundColor: colors.primary }]}
-            onPress={() => handleFeaturePress('Reserva inteligente')}
-          >
-            <ThemedText style={[styles.ctaTitle, { color: colors.accent }]}>Reserva en pocos toques</ThemedText>
-            <ThemedText style={[styles.ctaSubtitle, { color: colors.accent }]}>Elige un destino rápido o busca y asegura tu plaza</ThemedText>
-            <View style={[styles.ctaAction, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
-              <ThemedText style={{ color: colors.accent, fontWeight: '700' }}>Comenzar</ThemedText>
-            </View>
-          </TouchableOpacity>
+          {/* CTAs: Buscar plaza / Ofrecer plaza */}
+          <View style={{ gap: 12, marginBottom: 24 }}>
+            <TouchableOpacity 
+              style={[styles.ctaBanner, { backgroundColor: colors.primary }]}
+              onPress={() => handleFeaturePress('Buscar plaza')}
+            >
+              <ThemedText style={[styles.ctaTitle, { color: colors.accent }]}>Buscar plaza</ThemedText>
+              <ThemedText style={[styles.ctaSubtitle, { color: colors.accent }]}>Encuentra plazas disponibles cerca de ti</ThemedText>
+              <View style={[styles.ctaAction, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
+                <ThemedText style={{ color: colors.accent, fontWeight: '700' }}>Ir a explorar</ThemedText>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={[styles.ctaBanner, { backgroundColor: colors.secondary ?? '#34d399' }]}
+              onPress={() => handleFeaturePress('Ofrecer')}
+            >
+              <ThemedText style={[styles.ctaTitle, { color: colors.background }]}>Ofrecer mi plaza</ThemedText>
+              <ThemedText style={[styles.ctaSubtitle, { color: colors.background }]}>Publica tu plaza por un tiempo y gana dinero</ThemedText>
+              <View style={[styles.ctaAction, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
+                <ThemedText style={{ color: colors.background, fontWeight: '700' }}>Publicar ahora</ThemedText>
+              </View>
+            </TouchableOpacity>
+          </View>
 
           {/* Stats Section */}
           <View style={styles.statsSection}>
