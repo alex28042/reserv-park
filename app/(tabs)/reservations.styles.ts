@@ -163,6 +163,74 @@ export const reservationsStyles = StyleSheet.create({
     flex: 1,
     gap: 16,
   },
+  // Simplified Uber-like list item
+  listItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  itemLeft: {
+    flex: 1,
+    paddingRight: 12,
+  },
+  itemHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 6,
+  },
+  itemTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  itemSubRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  itemIconSmall: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  itemSubtitle: {
+    fontSize: 12,
+    opacity: 0.7,
+  },
+  tagChip: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  tagText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  itemRight: {
+    alignItems: 'flex-end',
+    minWidth: 80,
+  },
+  itemPrice: {
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  itemMeta: {
+    fontSize: 11,
+    opacity: 0.6,
+    marginBottom: 4,
+  },
   reservationCard: {
     borderRadius: 20,
     shadowColor: '#000',

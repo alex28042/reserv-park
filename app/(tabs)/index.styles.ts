@@ -123,6 +123,25 @@ export const indexStyles = StyleSheet.create({
     fontSize: 16,
     flex: 1,
   },
+  // Uber-like quick destination chips
+  chipsRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 12,
+  },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 999,
+    borderWidth: 1,
+    gap: 8,
+  },
+  chipText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
   
   // Saved locations styles
   savedLocationsSection: {
@@ -239,8 +258,65 @@ export const indexStyles = StyleSheet.create({
   featuresSection: {
     marginBottom: 32,
   },
+  // CTA banner (Uber-like promo)
+  ctaBanner: {
+    borderRadius: 18,
+    padding: 16,
+    marginBottom: 24,
+    overflow: 'hidden',
+  },
+  ctaTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 6,
+  },
+  ctaSubtitle: {
+    fontSize: 13,
+    opacity: 0.9,
+    marginBottom: 10,
+  },
+  ctaAction: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+  },
   featuresList: {
     gap: 16,
+  },
+  // Horizontal nearby carousel
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  horizontalScroll: {
+    paddingVertical: 6,
+  },
+  nearbyCard: {
+    width: 160,
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    marginRight: 12,
+  },
+  nearbyIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  nearbyTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  nearbySubtext: {
+    fontSize: 12,
+    opacity: 0.7,
   },
   featureCard: {
     borderRadius: 20,

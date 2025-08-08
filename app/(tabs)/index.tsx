@@ -124,7 +124,44 @@ export default function HomeScreen() {
               </ThemedText>
               <IconSymbol name="arrow.right" size={16} color={colors.text} style={{ opacity: 0.4 }} />
             </TouchableOpacity>
+
+            {/* Uber-like quick chips */}
+            <View style={styles.chipsRow}>
+              <TouchableOpacity 
+                style={[styles.chip, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                onPress={() => handleFeaturePress('Explorar zona')}
+              >
+                <IconSymbol name="location.fill" size={14} color={colors.primary} />
+                <ThemedText style={[styles.chipText, { color: colors.text }]}>Cerca de mí</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.chip, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                onPress={() => handleFeaturePress('Reservar')}
+              >
+                <IconSymbol name="clock.fill" size={14} color={colors.text} />
+                <ThemedText style={[styles.chipText, { color: colors.text }]}>Ahora</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.chip, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                onPress={() => handleFeaturePress('Búsqueda')}
+              >
+                <IconSymbol name="building.2.fill" size={14} color={colors.text} />
+                <ThemedText style={[styles.chipText, { color: colors.text }]}>Trabajo</ThemedText>
+              </TouchableOpacity>
+            </View>
           </View>
+
+          {/* CTA Banner */}
+          <TouchableOpacity 
+            style={[styles.ctaBanner, { backgroundColor: colors.primary }]}
+            onPress={() => handleFeaturePress('Reserva inteligente')}
+          >
+            <ThemedText style={[styles.ctaTitle, { color: colors.accent }]}>Reserva en pocos toques</ThemedText>
+            <ThemedText style={[styles.ctaSubtitle, { color: colors.accent }]}>Elige un destino rápido o busca y asegura tu plaza</ThemedText>
+            <View style={[styles.ctaAction, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
+              <ThemedText style={{ color: colors.accent, fontWeight: '700' }}>Comenzar</ThemedText>
+            </View>
+          </TouchableOpacity>
 
           {/* Stats Section */}
           <View style={styles.statsSection}>
@@ -156,6 +193,27 @@ export default function HomeScreen() {
                 </ThemedText>
               </View>
             </View>
+          </View>
+
+          {/* Nearby horizontal list */}
+          <View style={{ marginBottom: 24 }}>
+            <View style={styles.sectionHeaderRow}>
+              <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>Cerca de ti</ThemedText>
+              <TouchableOpacity onPress={() => handleFeaturePress('Explorar zona')}>
+                <ThemedText style={{ color: colors.primary, fontWeight: '700' }}>Ver más</ThemedText>
+              </TouchableOpacity>
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
+              {[{ t: 'Centro', d: '0.5 km' }, { t: 'Oficina', d: '1.2 km' }, { t: 'Atocha', d: '2.1 km' }, { t: 'Chueca', d: '1.8 km' }].map((item, idx) => (
+                <TouchableOpacity key={idx} style={[styles.nearbyCard, { backgroundColor: colors.surface, borderColor: colors.border }]} onPress={() => handleFeaturePress('Explorar zona')}>
+                  <View style={[styles.nearbyIcon, { backgroundColor: colors.primary }]}>
+                    <IconSymbol name="location.fill" size={16} color={colors.accent} />
+                  </View>
+                  <ThemedText style={[styles.nearbyTitle, { color: colors.text }]}>{item.t}</ThemedText>
+                  <ThemedText style={[styles.nearbySubtext, { color: colors.text }]}>{item.d}</ThemedText>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
 
           {/* Saved Locations */}

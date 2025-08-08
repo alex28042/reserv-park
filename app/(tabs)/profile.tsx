@@ -1,7 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Alert, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AboutModal } from '@/components/profile/AboutModal';
+import { EditProfileModal } from '@/components/profile/EditProfileModal';
+import { HelpModal } from '@/components/profile/HelpModal';
+import { HistoryModal } from '@/components/profile/HistoryModal';
+import { NotificationsModal } from '@/components/profile/NotificationsModal';
+import { PaymentsModal } from '@/components/profile/PaymentsModal';
+import { SettingsModal } from '@/components/profile/SettingsModal';
+import { VehiclesModal } from '@/components/profile/VehiclesModal';
 import { ThemedText } from '@/components/ThemedText';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
@@ -26,6 +34,12 @@ interface SettingsItemProps {
 export default function ProfileScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const [visibleModal, setVisibleModal] = useState<
+    'vehicles' | 'payments' | 'history' | 'notifications' | 'settings' | 'help' | 'about' | null
+  >(null);
+  const [editVisible, setEditVisible] = useState(false);
+  const [userName, setUserName] = useState('Alex Alonso');
+  const [userEmail, setUserEmail] = useState('alex.alonso@reservpark.com');
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
@@ -43,6 +57,26 @@ export default function ProfileScreen() {
             <ThemedText style={[styles.appName, { color: colors.text }]} type="defaultSemiBold">
               Mi Perfil
             </ThemedText>
+          </View>
+        </View>
+
+        {/* Quick chips under header (Uber-like) */}
+        <View style={{ paddingHorizontal: 20, marginBottom: 16 }}>
+          <View style={styles.chipsRow}>
+            <TouchableOpacity 
+              style={[styles.chip, { backgroundColor: colors.surface, borderColor: colors.border }]}
+              onPress={() => setVisibleModal('history')}
+            >
+              <IconSymbol name="list.bullet" size={14} color={colors.text} />
+              <ThemedText style={[styles.chipText, { color: colors.text }]}>Historial</ThemedText>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.chip, { backgroundColor: colors.surface, borderColor: colors.border }]}
+              onPress={() => setVisibleModal('payments')}
+            >
+              <IconSymbol name="creditcard.fill" size={14} color={colors.text} />
+              <ThemedText style={[styles.chipText, { color: colors.text }]}>Pagos</ThemedText>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -77,10 +111,28 @@ export default function ProfileScreen() {
                 </View>
               </View>
             </View>
-            <TouchableOpacity onPress={() => Alert.alert('Editar perfil', 'Función de edición de perfil')}>
+            <TouchableOpacity onPress={() => setEditVisible(true)}>
               <IconSymbol name="chevron.right" size={20} color={colors.text} />
             </TouchableOpacity>
           </View>
+        </View>
+
+        {/* CTA Banner */}
+        <View style={{ paddingHorizontal: 20, marginBottom: 24 }}>
+          <TouchableOpacity 
+            style={[styles.bannerCard, { backgroundColor: colors.primary }]}
+            onPress={() => Alert.alert('ReservPark Plus', 'Beneficios y ventajas próximamente')}
+          >
+            <ThemedText style={[styles.bannerTitle, { color: colors.accent }]} type="defaultSemiBold">
+              Activa ReservPark Plus
+            </ThemedText>
+            <ThemedText style={[styles.bannerSubtitle, { color: colors.accent }]}>
+              Descuentos y reservas prioritarias cerca de ti
+            </ThemedText>
+            <View style={[styles.bannerButton, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
+              <ThemedText style={{ color: colors.accent, fontWeight: '700' }}>Ver beneficios</ThemedText>
+            </View>
+          </TouchableOpacity>
         </View>
 
         {/* Quick Actions */}
@@ -90,13 +142,13 @@ export default function ProfileScreen() {
               title="Mis Vehículos"
               subtitle="2 vehículos"
               icon="car.fill"
-              onPress={() => Alert.alert('Mis Vehículos', 'Gestiona tus vehículos registrados')}
+              onPress={() => setVisibleModal('vehicles')}
             />
             <QuickAction 
               title="Pagos"
               subtitle="Visa ****1234"
               icon="creditcard.fill"
-              onPress={() => Alert.alert('Métodos de Pago', 'Gestiona tus formas de pago')}
+              onPress={() => setVisibleModal('payments')}
             />
           </View>
         </View>
@@ -140,21 +192,21 @@ export default function ProfileScreen() {
               title="Historial de viajes"
               subtitle="Ver todas tus reservas"
               icon="list.bullet"
-              onPress={() => Alert.alert('Historial', 'Ver todas tus transacciones')}
+              onPress={() => setVisibleModal('history')}
             />
             
             <SettingsItem 
               title="Notificaciones"
               subtitle="Gestionar alertas y avisos"
               icon="bell.fill"
-              onPress={() => Alert.alert('Notificaciones', 'Configurar notificaciones')}
+              onPress={() => setVisibleModal('notifications')}
             />
             
             <SettingsItem 
               title="Configuración"
               subtitle="Privacidad y preferencias"
               icon="gearshape.fill"
-              onPress={() => Alert.alert('Configuración', 'Ajustes de la aplicación')}
+              onPress={() => setVisibleModal('settings')}
             />
           </View>
         </View>
@@ -169,13 +221,13 @@ export default function ProfileScreen() {
             <SettingsItem 
               title="Centro de ayuda"
               icon="questionmark.circle.fill"
-              onPress={() => Alert.alert('Ayuda', 'Centro de ayuda y soporte')}
+              onPress={() => setVisibleModal('help')}
             />
             
             <SettingsItem 
               title="Acerca de ReservPark"
               icon="info.circle.fill"
-              onPress={() => Alert.alert('Acerca de', 'Información sobre ReservPark v1.0')}
+              onPress={() => setVisibleModal('about')}
             />
             
             <SettingsItem 
@@ -202,7 +254,22 @@ export default function ProfileScreen() {
           </ThemedText>
         </View>
       </ScrollView>
-    </SafeAreaView>
+        {/* Slide-up modals */}
+        <VehiclesModal visible={visibleModal === 'vehicles'} onClose={() => setVisibleModal(null)} />
+        <PaymentsModal visible={visibleModal === 'payments'} onClose={() => setVisibleModal(null)} />
+        <HistoryModal visible={visibleModal === 'history'} onClose={() => setVisibleModal(null)} />
+        <NotificationsModal visible={visibleModal === 'notifications'} onClose={() => setVisibleModal(null)} />
+        <SettingsModal visible={visibleModal === 'settings'} onClose={() => setVisibleModal(null)} />
+        <HelpModal visible={visibleModal === 'help'} onClose={() => setVisibleModal(null)} />
+        <AboutModal visible={visibleModal === 'about'} onClose={() => setVisibleModal(null)} />
+        <EditProfileModal 
+          visible={editVisible}
+          name={userName}
+          email={userEmail}
+          onSave={(n, e) => { setUserName(n); setUserEmail(e); }}
+          onClose={() => setEditVisible(false)}
+        />
+      </SafeAreaView>
   );
 }
 
@@ -310,6 +377,24 @@ const styles = StyleSheet.create({
   },
   appName: {
     fontSize: 20,
+    fontWeight: '600',
+  },
+  // Chips
+  chipsRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 999,
+    borderWidth: 1,
+    gap: 8,
+  },
+  chipText: {
+    fontSize: 14,
     fontWeight: '600',
   },
   // Profile section
@@ -421,6 +506,26 @@ const styles = StyleSheet.create({
   statsSection: {
     paddingHorizontal: 20,
     marginBottom: 32,
+  },
+  // Banner CTA
+  bannerCard: {
+    borderRadius: 16,
+    padding: 16,
+  },
+  bannerTitle: {
+    fontSize: 18,
+    marginBottom: 4,
+  },
+  bannerSubtitle: {
+    fontSize: 13,
+    opacity: 0.9,
+    marginBottom: 10,
+  },
+  bannerButton: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
   },
   sectionTitle: {
     fontSize: 18,

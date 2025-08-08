@@ -165,20 +165,8 @@ export default function ExploreScreen() {
 
   const centerOnUserLocation = async () => {
     try {
-      Alert.alert(
-        '📍 Ubicación GPS',
-        '¿Deseas actualizar tu ubicación y centrar el mapa?',
-        [
-          { text: 'Cancelar', style: 'cancel' },
-          { 
-            text: 'Sí, obtener ubicación', 
-            onPress: async () => {
-              await getCurrentLocation();
-              // El useEffect se encargará de centrar el mapa cuando la ubicación se actualice
-            }
-          }
-        ]
-      );
+      await getCurrentLocation();
+      // El useEffect se encargará de centrar el mapa cuando la ubicación se actualice
     } catch (error) {
       Alert.alert('Error', 'No se pudo obtener tu ubicación');
     }

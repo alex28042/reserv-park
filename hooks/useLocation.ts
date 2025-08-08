@@ -51,7 +51,11 @@ export function useLocation(): LocationHookResult {
 
   const getCurrentLocation = async (): Promise<void> => {
     try {
-      setLoading(true);
+      // Evitar mostrar loading si ya tenemos una ubicación previa
+      const hadPreviousLocation = Boolean(location);
+      if (!hadPreviousLocation) {
+        setLoading(true);
+      }
       setErrorMsg(null);
 
       const hasPermission = await requestPermission();
@@ -59,29 +63,52 @@ export function useLocation(): LocationHookResult {
         return; // No se pudo obtener permiso
       }
 
-      console.log('📍 Obteniendo ubicación GPS del dispositivo...');
-      
-      const currentLocation = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.High, // Usar alta precisión
-      });
+      console.log('📍 Obteniendo ubicación (rápida si hay caché, luego precisa)...');
 
-      console.log('✅ Ubicación obtenida:', {
-        lat: currentLocation.coords.latitude,
-        lng: currentLocation.coords.longitude,
-        accuracy: currentLocation.coords.accuracy
-      });
+      // 1) Intento rápido: usar la última ubicación conocida para pintar algo al instante
+      try {
+        const lastKnown = await Location.getLastKnownPositionAsync();
+        if (lastKnown) {
+          const quickLocation: LocationData = {
+            latitude: lastKnown.coords.latitude,
+            longitude: lastKnown.coords.longitude,
+            latitudeDelta: 0.015,
+            longitudeDelta: 0.015,
+          };
+          setLocation(quickLocation);
+          setLoading(false);
+        }
+      } catch (e) {
+        // Ignorar errores de last known; continuamos con el fetch en vivo
+      }
 
-      const locationData: LocationData = {
-        latitude: currentLocation.coords.latitude,
-        longitude: currentLocation.coords.longitude,
-        latitudeDelta: 0.015,
-        longitudeDelta: 0.015,
-      };
+      // 2) Actualización en segundo plano con una precisión equilibrada para ser más rápida
+      try {
+        const currentLocation = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+          // maximumAge permite devolver valores cacheados muy recientes si están disponibles
+          // @ts-ignore: algunas versiones permiten maximumAge
+          maximumAge: 10000,
+        } as any);
 
-      setLocation(locationData);
-      setLoading(false);
+        const preciseLocation: LocationData = {
+          latitude: currentLocation.coords.latitude,
+          longitude: currentLocation.coords.longitude,
+          latitudeDelta: 0.015,
+          longitudeDelta: 0.015,
+        };
+
+        setLocation(preciseLocation);
+        setLoading(false);
+      } catch (error) {
+        console.error('❌ Error obteniendo ubicación (rápida/precisa):', error);
+        if (!hadPreviousLocation) {
+          setErrorMsg('No se pudo obtener tu ubicación. Verifica que el GPS esté activado.');
+          setLoading(false);
+        }
+      }
     } catch (error) {
-      console.error('❌ Error obteniendo ubicación:', error);
+      console.error('❌ Error general al obtener ubicación:', error);
       setErrorMsg('No se pudo obtener tu ubicación. Verifica que el GPS esté activado.');
       setLoading(false);
     }
