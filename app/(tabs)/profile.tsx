@@ -90,7 +90,7 @@ export default function ProfileScreen() {
                 <IconSymbol name="person.fill" size={32} color={colors.accent} />
               </View>
               <View style={styles.userInfo}>
-              <ThemedText style={[styles.userName, { color: colors.text }]} type="defaultSemiBold">
+                <ThemedText style={[styles.userName, { color: colors.text }]} type="defaultSemiBold">
                   {user?.email ?? 'Usuario'}
                 </ThemedText>
                 <ThemedText style={[styles.userEmail, { color: colors.text }]}>
@@ -99,16 +99,12 @@ export default function ProfileScreen() {
                 <View style={styles.userStats}>
                   <View style={styles.statItem}>
                     <IconSymbol name="star.fill" size={14} color={colors.warning} />
-                    <ThemedText style={[styles.statText, { color: colors.text }]}>
-                      4.8
-                    </ThemedText>
+                    <ThemedText style={[styles.statText, { color: colors.text }]}>4.8</ThemedText>
                   </View>
                   <View style={styles.statDivider} />
                   <View style={styles.statItem}>
                     <IconSymbol name="calendar" size={14} color={colors.primary} />
-                    <ThemedText style={[styles.statText, { color: colors.text }]}>
-                      15 viajes
-                    </ThemedText>
+                    <ThemedText style={[styles.statText, { color: colors.text }]}>15 viajes</ThemedText>
                   </View>
                 </View>
               </View>
@@ -128,64 +124,11 @@ export default function ProfileScreen() {
             <ThemedText style={[styles.bannerTitle, { color: colors.accent }]} type="defaultSemiBold">
               Activa ReservPark Plus
             </ThemedText>
-            <ThemedText style={[styles.bannerSubtitle, { color: colors.accent }]}>
-              Descuentos y reservas prioritarias cerca de ti
-            </ThemedText>
+            <ThemedText style={[styles.bannerSubtitle, { color: colors.accent }]}>Descuentos y reservas prioritarias cerca de ti</ThemedText>
             <View style={[styles.bannerButton, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
               <ThemedText style={{ color: colors.accent, fontWeight: '700' }}>Ver beneficios</ThemedText>
             </View>
           </TouchableOpacity>
-        </View>
-
-        {/* Quick Actions */}
-        <View style={styles.quickActionsSection}>
-          <View style={styles.quickActionsGrid}>
-            <QuickAction 
-              title="Mis Vehículos"
-              subtitle="2 vehículos"
-              icon="car.fill"
-              onPress={() => setVisibleModal('vehicles')}
-            />
-            <QuickAction 
-              title="Pagos"
-              subtitle="Visa ****1234"
-              icon="creditcard.fill"
-              onPress={() => setVisibleModal('payments')}
-            />
-          </View>
-        </View>
-
-        {/* Stats Section */}
-        <View style={styles.statsSection}>
-          <ThemedText style={[styles.sectionTitle, { color: colors.text }]} type="defaultSemiBold">
-            Tu actividad
-          </ThemedText>
-          
-          <View style={[styles.statsCard, { backgroundColor: colors.surface, borderColor: colors.border }]}> 
-            <View style={styles.statsGrid}> 
-              <View style={[styles.statTile, { borderColor: colors.border }]}> 
-                <View style={[styles.statTileIcon, { backgroundColor: colors.primary }]}> 
-                  <IconSymbol name="eurosign" size={14} color={colors.accent} />
-                </View>
-                <ThemedText style={[styles.tileValue, { color: colors.primary }]} type="defaultSemiBold">€47</ThemedText>
-                <ThemedText style={[styles.tileLabel, { color: colors.text }]}>Ahorrado este mes</ThemedText>
-              </View>
-              <View style={[styles.statTile, { borderColor: colors.border }]}> 
-                <View style={[styles.statTileIcon, { backgroundColor: colors.primary }]}> 
-                  <IconSymbol name="car.fill" size={14} color={colors.accent} />
-                </View>
-                <ThemedText style={[styles.tileValue, { color: colors.primary }]} type="defaultSemiBold">8</ThemedText>
-                <ThemedText style={[styles.tileLabel, { color: colors.text }]}>Plazas compartidas</ThemedText>
-              </View>
-              <View style={[styles.statTile, { borderColor: colors.border }]}> 
-                <View style={[styles.statTileIcon, { backgroundColor: colors.primary }]}> 
-                  <IconSymbol name="clock.fill" size={14} color={colors.accent} />
-                </View>
-                <ThemedText style={[styles.tileValue, { color: colors.primary }]} type="defaultSemiBold">1h 20m</ThemedText>
-                <ThemedText style={[styles.tileLabel, { color: colors.text }]}>Tiempo ahorrado</ThemedText>
-              </View>
-            </View>
-          </View>
         </View>
 
         {/* Settings Section */}
@@ -193,7 +136,6 @@ export default function ProfileScreen() {
           <ThemedText style={[styles.sectionTitle, { color: colors.text }]} type="defaultSemiBold">
             Configuración
           </ThemedText>
-          
           <View style={styles.settingsGroup}>
             <SettingsItem 
               title="Historial de viajes"
@@ -201,42 +143,18 @@ export default function ProfileScreen() {
               icon="list.bullet"
               onPress={() => setVisibleModal('history')}
             />
-            
             <SettingsItem 
               title="Notificaciones"
               subtitle="Gestionar alertas y avisos"
               icon="bell.fill"
               onPress={() => setVisibleModal('notifications')}
             />
-            
             <SettingsItem 
               title="Configuración"
               subtitle="Privacidad y preferencias"
               icon="gearshape.fill"
               onPress={() => setVisibleModal('settings')}
             />
-          </View>
-        </View>
-
-        {/* Support Section */}
-        <View style={styles.supportSection}>
-          <ThemedText style={[styles.sectionTitle, { color: colors.text }]} type="defaultSemiBold">
-            Soporte
-          </ThemedText>
-          
-          <View style={styles.settingsGroup}>
-            <SettingsItem 
-              title="Centro de ayuda"
-              icon="questionmark.circle.fill"
-              onPress={() => setVisibleModal('help')}
-            />
-            
-            <SettingsItem 
-              title="Acerca de ReservPark"
-              icon="info.circle.fill"
-              onPress={() => setVisibleModal('about')}
-            />
-            
             <SettingsItem 
               title="Cerrar sesión"
               icon="arrow.right.square.fill"
@@ -256,27 +174,26 @@ export default function ProfileScreen() {
 
         {/* App Version */}
         <View style={styles.versionSection}>
-          <ThemedText style={[styles.versionText, { color: colors.text }]}>
-            ReservPark v1.0.0
-          </ThemedText>
+          <ThemedText style={[styles.versionText, { color: colors.text }]}>ReservPark v1.0.0</ThemedText>
         </View>
       </ScrollView>
-        {/* Slide-up modals */}
-        <VehiclesModal visible={visibleModal === 'vehicles'} onClose={() => setVisibleModal(null)} />
-        <PaymentsModal visible={visibleModal === 'payments'} onClose={() => setVisibleModal(null)} />
-        <HistoryModal visible={visibleModal === 'history'} onClose={() => setVisibleModal(null)} />
-        <NotificationsModal visible={visibleModal === 'notifications'} onClose={() => setVisibleModal(null)} />
-        <SettingsModal visible={visibleModal === 'settings'} onClose={() => setVisibleModal(null)} />
-        <HelpModal visible={visibleModal === 'help'} onClose={() => setVisibleModal(null)} />
-        <AboutModal visible={visibleModal === 'about'} onClose={() => setVisibleModal(null)} />
-        <EditProfileModal 
-          visible={editVisible}
-          name={userName}
-          email={userEmail}
-          onSave={(n, e) => { setUserName(n); setUserEmail(e); }}
-          onClose={() => setEditVisible(false)}
-        />
-      </SafeAreaView>
+
+      {/* Modals */}
+      <VehiclesModal visible={visibleModal === 'vehicles'} onClose={() => setVisibleModal(null)} />
+      <PaymentsModal visible={visibleModal === 'payments'} onClose={() => setVisibleModal(null)} />
+      <HistoryModal visible={visibleModal === 'history'} onClose={() => setVisibleModal(null)} />
+      <NotificationsModal visible={visibleModal === 'notifications'} onClose={() => setVisibleModal(null)} />
+      <SettingsModal visible={visibleModal === 'settings'} onClose={() => setVisibleModal(null)} />
+      <HelpModal visible={visibleModal === 'help'} onClose={() => setVisibleModal(null)} />
+      <AboutModal visible={visibleModal === 'about'} onClose={() => setVisibleModal(null)} />
+      <EditProfileModal 
+        visible={editVisible}
+        name={userName}
+        email={userEmail}
+        onSave={(n, e) => { setUserName(n); setUserEmail(e); }}
+        onClose={() => setEditVisible(false)}
+      />
+    </SafeAreaView>
   );
 }
 
@@ -343,7 +260,6 @@ function SettingsItem({ title, subtitle, icon, onPress, showChevron = true, dest
           )}
         </View>
       </View>
-      
       {showChevron && (
         <IconSymbol name="chevron.right" size={16} color={colors.text} />
       )}
@@ -352,300 +268,58 @@ function SettingsItem({ title, subtitle, icon, onPress, showChevron = true, dest
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-          paddingBottom: Platform.select({
-        ios: 105, // 85px tab bar + 20px spacing
-        default: 85, // 65px tab bar + 20px spacing
-      }),
-  },
-  // Header styles
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 15,
-  },
-  headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  logoSmall: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  appName: {
-    fontSize: 20,
-    fontWeight: '600',
-  },
-  // Chips
-  chipsRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 999,
-    borderWidth: 1,
-    gap: 8,
-  },
-  chipText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  // Profile section
-  profileSection: {
-    paddingHorizontal: 20,
-    marginBottom: 24,
-  },
-  profileCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  profileInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  userInfo: {
-    flex: 1,
-  },
-  userName: {
-    fontSize: 18,
-    marginBottom: 4,
-  },
-  userEmail: {
-    fontSize: 14,
-    opacity: 0.7,
-    marginBottom: 8,
-  },
-  userStats: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  statItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  statDivider: {
-    width: 1,
-    height: 12,
-    backgroundColor: '#ddd',
-    marginHorizontal: 8,
-  },
-  statText: {
-    fontSize: 12,
-  },
-  // Quick actions
-  quickActionsSection: {
-    paddingHorizontal: 20,
-    marginBottom: 32,
-  },
-  quickActionsGrid: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  quickActionCard: {
-    flex: 1,
-    padding: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  quickActionIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  quickActionInfo: {
-    alignItems: 'flex-start',
-  },
-  quickActionTitle: {
-    fontSize: 16,
-    marginBottom: 4,
-  },
-  quickActionSubtitle: {
-    fontSize: 12,
-    opacity: 0.7,
-  },
-  // Stats section
-  statsSection: {
-    paddingHorizontal: 20,
-    marginBottom: 32,
-  },
-  // Banner CTA
-  bannerCard: {
-    borderRadius: 16,
-    padding: 16,
-  },
-  bannerTitle: {
-    fontSize: 18,
-    marginBottom: 4,
-  },
-  bannerSubtitle: {
-    fontSize: 13,
-    opacity: 0.9,
-    marginBottom: 10,
-  },
-  bannerButton: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 12,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    marginBottom: 16,
-  },
-  statsCard: {
-    padding: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    gap: 12,
-  },
-  statTile: {
-    flex: 1,
-    borderWidth: 1,
-    borderRadius: 14,
-    paddingVertical: 14,
-    paddingHorizontal: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 96,
-    gap: 6,
-  },
-  statTileIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 2,
-  },
-  tileValue: {
-    fontSize: 20,
-    lineHeight: 24,
-    textAlign: 'center',
-  },
-  tileLabel: {
-    fontSize: 12,
-    opacity: 0.7,
-    textAlign: 'center',
-    lineHeight: 16,
-    paddingHorizontal: 4,
-  },
-  activityStatItem: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 6,
-  },
-  statValue: {
-    fontSize: 24,
-    marginBottom: 4,
-    textAlign: 'center',
-  },
-  statLabel: {
-    fontSize: 14,
-    opacity: 0.7,
-    textAlign: 'center',
-  },
-  // Settings sections
-  settingsSection: {
-    paddingHorizontal: 20,
-    marginBottom: 32,
-  },
-  supportSection: {
-    paddingHorizontal: 20,
-    marginBottom: 32,
-  },
-  settingsGroup: {
-    gap: 1,
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-  settingsItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-  },
-  settingsItemLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  settingsIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  settingsInfo: {
-    flex: 1,
-  },
-  settingsTitle: {
-    fontSize: 16,
-    marginBottom: 2,
-  },
-  settingsSubtitle: {
-    fontSize: 14,
-    opacity: 0.7,
-  },
-  // Version section
-  versionSection: {
-    alignItems: 'center',
-    paddingVertical: 20,
-  },
-  versionText: {
-    fontSize: 14,
-    opacity: 0.5,
-  },
+  container: { flex: 1 },
+  scrollView: { flex: 1 },
+  scrollContent: { paddingBottom: Platform.select({ ios: 105, default: 85 }) },
+  header: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 15 },
+  headerContent: { flexDirection: 'row', alignItems: 'center' },
+  logoSmall: { width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+  appName: { fontSize: 20, fontWeight: '600' },
+  chipsRow: { flexDirection: 'row', gap: 10 },
+  chip: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 10, borderRadius: 999, borderWidth: 1, gap: 8 },
+  chipText: { fontSize: 14, fontWeight: '600' },
+  profileSection: { paddingHorizontal: 20, marginBottom: 24 },
+  profileCard: { flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 16, borderWidth: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 3 },
+  profileInfo: { flexDirection: 'row', alignItems: 'center', flex: 1 },
+  avatar: { width: 60, height: 60, borderRadius: 30, justifyContent: 'center', alignItems: 'center', marginRight: 16 },
+  userInfo: { flex: 1 },
+  userName: { fontSize: 18, marginBottom: 4 },
+  userEmail: { fontSize: 14, opacity: 0.7, marginBottom: 8 },
+  userStats: { flexDirection: 'row', alignItems: 'center' },
+  statItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  statDivider: { width: 1, height: 12, backgroundColor: '#ddd', marginHorizontal: 8 },
+  statText: { fontSize: 12 },
+  quickActionsSection: { paddingHorizontal: 20, marginBottom: 32 },
+  quickActionsGrid: { flexDirection: 'row', gap: 12 },
+  quickActionCard: { flex: 1, padding: 16, borderRadius: 16, borderWidth: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 3 },
+  quickActionIcon: { width: 48, height: 48, borderRadius: 24, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
+  quickActionInfo: { alignItems: 'flex-start' },
+  quickActionTitle: { fontSize: 16, marginBottom: 4 },
+  quickActionSubtitle: { fontSize: 12, opacity: 0.7 },
+  statsSection: { paddingHorizontal: 20, marginBottom: 32 },
+  bannerCard: { borderRadius: 16, padding: 16 },
+  bannerTitle: { fontSize: 18, marginBottom: 4 },
+  bannerSubtitle: { fontSize: 13, opacity: 0.9, marginBottom: 10 },
+  bannerButton: { alignSelf: 'flex-start', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12 },
+  sectionTitle: { fontSize: 18, marginBottom: 16 },
+  statsCard: { padding: 16, borderRadius: 16, borderWidth: 1 },
+  statsGrid: { flexDirection: 'row', alignItems: 'stretch', gap: 12 },
+  statTile: { flex: 1, borderWidth: 1, borderRadius: 14, paddingVertical: 14, paddingHorizontal: 12, alignItems: 'center', justifyContent: 'center', minHeight: 96, gap: 6 },
+  statTileIcon: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginBottom: 2 },
+  tileValue: { fontSize: 20, lineHeight: 24, textAlign: 'center' },
+  tileLabel: { fontSize: 12, opacity: 0.7, textAlign: 'center', lineHeight: 16, paddingHorizontal: 4 },
+  activityStatItem: { flex: 1, alignItems: 'center', paddingVertical: 6 },
+  statValue: { fontSize: 24, marginBottom: 4, textAlign: 'center' },
+  statLabel: { fontSize: 14, opacity: 0.7, textAlign: 'center' },
+  settingsSection: { paddingHorizontal: 20, marginBottom: 32 },
+  supportSection: { paddingHorizontal: 20, marginBottom: 32 },
+  settingsGroup: { gap: 1, borderRadius: 16, overflow: 'hidden' },
+  settingsItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 16 },
+  settingsItemLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
+  settingsIcon: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center', marginRight: 16 },
+  settingsInfo: { flex: 1 },
+  settingsTitle: { fontSize: 16, marginBottom: 2 },
+  settingsSubtitle: { fontSize: 14, opacity: 0.7 },
+  versionSection: { alignItems: 'center', paddingVertical: 20 },
+  versionText: { fontSize: 14, opacity: 0.5 },
 });

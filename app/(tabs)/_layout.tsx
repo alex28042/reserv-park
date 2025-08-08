@@ -1,5 +1,5 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
+import { Tabs, router } from 'expo-router';
+import React, { useEffect } from 'react';
 import { Platform } from 'react-native';
 
 import { HapticTab } from '@/components/HapticTab';
@@ -10,6 +10,13 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+
+  // Guard: if not authenticated (mock), force welcome (run each render)
+  useEffect(() => {
+    if ((global as any).__mockAuth !== true) {
+      router.replace('/welcome');
+    }
+  });
 
   return (
     <Tabs
