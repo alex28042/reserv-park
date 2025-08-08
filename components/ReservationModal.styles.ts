@@ -65,6 +65,29 @@ export const reservationModalStyles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
   },
+  mapPreviewWrapper: {
+    height: 180,
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginTop: 12,
+    marginBottom: 16,
+  },
+  mapPreview: {
+    flex: 1,
+  },
+  reservationMarker: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#FFF',
+  },
+  markerText: {
+    color: '#FFF',
+    fontWeight: '700',
+  },
   
   // Step Header
   stepHeader: {

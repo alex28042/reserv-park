@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Linking, Platform, ScrollView, TouchableOpacity, View } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ActivityIndicator, Alert, Linking, Modal, Platform, ScrollView, TextInput, TouchableOpacity, View } from 'react-native';
+import MapView, { Marker, PROVIDER_GOOGLE, Region } from 'react-native-maps';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ReservationDetails } from '@/components/ReservationDetails';
 import { ReservationModal } from '@/components/ReservationModal';
 import { ThemedText } from '@/components/ThemedText';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -68,12 +69,31 @@ const mockParkingSpots: ParkingSpot[] = [
 export default function ExploreScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const insets = useSafeAreaInsets();
   const [selectedFilter, setSelectedFilter] = useState<'available' | 'all'>('available');
   const [mapView, setMapView] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
+  const [activeSpotId, setActiveSpotId] = useState<string | null>(null);
+  const [isFullscreenMap, setIsFullscreenMap] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchActive, setIsSearchActive] = useState(false);
   const mapRef = useRef<MapView>(null);
   const scrollRef = useRef<any>(null);
+  const [currentRegion, setCurrentRegion] = useState<Region | null>(null);
+  const [reservationDetailsVisible, setReservationDetailsVisible] = useState(false);
+  const [reservationDetailsData, setReservationDetailsData] = useState<{
+    id: string;
+    type: 'active' | 'completed' | 'cancelled';
+    address: string;
+    date: string;
+    time: string;
+    price: string;
+    duration: string;
+    status: string;
+    latitude?: number;
+    longitude?: number;
+  } | null>(null);
   
   const getToggleIcon = (): 'funnel.fill' | 'map.fill' => {
     return mapView ? 'funnel.fill' : 'map.fill';
@@ -111,6 +131,7 @@ export default function ExploreScreen() {
   }, [selectedFilter]);
 
   const handleSpotPress = (spot: ParkingSpot) => {
+    setActiveSpotId(spot.id);
     // Hacer scroll hacia el mapa para mostrarlo
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ y: 0, animated: true });
@@ -128,39 +149,81 @@ export default function ExploreScreen() {
       }, 300); // Delay para que primero se haga el scroll
     }
 
-    // Mostrar el alert después del scroll y zoom
-    setTimeout(() => {
-    Alert.alert(
-        '🅿️ Plaza de aparcamiento',
-        `📍 ${spot.address}\n💰 ${spot.price}\n⏱️ Disponible: ${spot.timeLeft}\n📏 Distancia: ${spot.distance}`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-          { 
-            text: 'Ver en mapa', 
-            onPress: () => {
-              // Hacer zoom aún más cercano cuando presionan "Ver en mapa"
-              if (mapRef.current) {
-                mapRef.current.animateToRegion({
-                  latitude: spot.latitude,
-                  longitude: spot.longitude,
-                  latitudeDelta: 0.005, // Zoom muy cercano
-                  longitudeDelta: 0.005,
-                }, 600);
-              }
-            }
-          },
-          { 
-            text: '🚗 Reservar', 
-            onPress: () => handleReservation(spot),
-            style: 'default'
-          }
-        ]
-      );
-    }, 800);
+    // Preguntar si desea reservar y abrir detalles
+    setTimeout(() => promptReserve(spot), 600);
   };
 
   const handleSearchPress = () => {
     Alert.alert('Búsqueda', 'Abrir búsqueda de ubicación');
+  };
+
+  const handleSearchSubmit = () => {
+    if (!searchQuery.trim()) return;
+    Alert.alert('Buscar', `Aún no implementado. Consulta: ${searchQuery.trim()}`);
+  };
+
+  const computeDistanceMeters = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const toRad = (d: number) => (d * Math.PI) / 180;
+    const R = 6371000;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  const nearbySuggestions = React.useMemo(() => {
+    const source = mockParkingSpots.filter((s) => s.type === 'available');
+    const text = searchQuery.trim().toLowerCase();
+    const filtered = text
+      ? source.filter((s) => s.address.toLowerCase().includes(text))
+      : source;
+    const items = [...filtered]
+      .map((s) => {
+        let distanceMeters = Number.MAX_SAFE_INTEGER;
+        if (location?.latitude && location?.longitude) {
+          distanceMeters = computeDistanceMeters(
+            location.latitude,
+            location.longitude,
+            s.latitude,
+            s.longitude
+          );
+        }
+        const distanceKm = (distanceMeters / 1000);
+        const distanceLabel = distanceMeters === Number.MAX_SAFE_INTEGER
+          ? s.distance
+          : `${distanceKm.toFixed(distanceKm < 10 ? 1 : 0)} km`;
+        return {
+          id: s.id,
+          title: s.address,
+          subtitle: `${formatPriceLabel(s.price)} • ${distanceLabel}`,
+          latitude: s.latitude,
+          longitude: s.longitude,
+          distanceMeters,
+        };
+      })
+      .sort((a, b) => a.distanceMeters - b.distanceMeters)
+      .slice(0, 8);
+    return items;
+  }, [location, searchQuery]);
+
+  const goToSuggestion = (sug: { latitude: number; longitude: number; title: string }) => {
+    setSearchQuery(sug.title);
+    setIsSearchActive(false);
+    if (mapRef.current) {
+      mapRef.current.animateToRegion(
+        {
+          latitude: sug.latitude,
+          longitude: sug.longitude,
+          latitudeDelta: 0.008,
+          longitudeDelta: 0.008,
+        },
+        600
+      );
+    }
   };
 
   const centerOnUserLocation = async () => {
@@ -172,29 +235,92 @@ export default function ExploreScreen() {
     }
   };
 
+  const getRegionOrFallback = (): Region => {
+    if (currentRegion) return currentRegion;
+    return {
+      latitude: location?.latitude || 40.4168,
+      longitude: location?.longitude || -3.7038,
+      latitudeDelta: 0.015,
+      longitudeDelta: 0.015,
+    };
+  };
+
+  const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+
+  const zoom = (factor: number) => {
+    const region = getRegionOrFallback();
+    const newRegion: Region = {
+      ...region,
+      latitudeDelta: clamp(region.latitudeDelta * factor, 0.001, 0.2),
+      longitudeDelta: clamp(region.longitudeDelta * factor, 0.001, 0.2),
+    };
+    mapRef.current?.animateToRegion(newRegion, 250);
+  };
+
+  const zoomIn = () => zoom(0.5);
+  const zoomOut = () => zoom(2);
+
   const handleMarkerPress = (spot: ParkingSpot) => {
-    // Zoom directo al marcador
+    setActiveSpotId(spot.id);
+    // Zoom y abrir modal directamente
     if (mapRef.current) {
       mapRef.current.animateToRegion({
         latitude: spot.latitude,
         longitude: spot.longitude,
         latitudeDelta: 0.005,
         longitudeDelta: 0.005,
-      }, 500);
+      }, 400);
     }
+    promptReserve(spot);
+  };
 
-    // Mostrar información del spot sin mover el mapa de nuevo
+  const promptReserve = (spot: ParkingSpot) => {
     Alert.alert(
-      '🅿️ Plaza de aparcamiento',
-      `📍 ${spot.address}\n💰 ${spot.price}\n⏱️ Disponible: ${spot.timeLeft}\n📏 Distancia: ${spot.distance}`,
+      'Reservar plaza',
+      `¿Quieres reservar esta plaza en\n${spot.address}?`,
       [
-        { text: 'Cancelar', style: 'cancel' },
-        { 
-          text: '🚗 Reservar', 
-          onPress: () => handleReservation(spot)
-        }
+        { text: 'No', style: 'cancel' },
+        {
+          text: 'Sí, reservar',
+          style: 'default',
+          onPress: () => openReservationFlowFromSpot(spot),
+        },
       ]
     );
+  };
+
+  const openReservationFlowFromSpot = (spot: ParkingSpot) => {
+    // Close fullscreen map and search
+    setIsFullscreenMap(false);
+    setIsSearchActive(false);
+    setSearchQuery('');
+    // Open ReservationModal (multi-step flow)
+    handleReservation(spot);
+  };
+
+  const openReservationDetailsFromSpot = (spot: ParkingSpot) => {
+    // Close fullscreen map and search UI if open
+    setIsFullscreenMap(false);
+    setIsSearchActive(false);
+    setSearchQuery('');
+
+    const now = new Date();
+    const date = now.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const time = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    const reservation = {
+      id: `r-${spot.id}-${now.getTime()}`,
+      type: 'active' as const,
+      address: spot.address,
+      date,
+      time,
+      price: spot.price,
+      duration: '1 hora',
+      status: 'Reserva pendiente de inicio',
+      latitude: spot.latitude,
+      longitude: spot.longitude,
+    };
+    setReservationDetailsData(reservation);
+    setReservationDetailsVisible(true);
   };
 
   const handleReservation = (spot: ParkingSpot) => {
@@ -346,6 +472,9 @@ export default function ExploreScreen() {
                     latitudeDelta: 0.015,
                     longitudeDelta: 0.015,
                   }}
+                  onRegionChangeComplete={(r) => setCurrentRegion(r)}
+                  zoomEnabled={true}
+                  zoomControlEnabled={Platform.OS === 'android'}
                   showsUserLocation={true}
                   showsMyLocationButton={false}
                   showsCompass={false}
@@ -387,24 +516,38 @@ export default function ExploreScreen() {
                       }}
                       title={spot.address}
                       description={`${spot.price} • ${getStatusText(spot.type)} • ${spot.distance}`}
-                      pinColor={getMarkerColor(spot.type, colors)}
                       onPress={() => handleMarkerPress(spot)}
                     >
-                      <View style={[
-                        styles.customMarker, 
-                        { 
-                          backgroundColor: getMarkerColor(spot.type, colors),
-                          borderColor: colorScheme === 'dark' ? '#1d2c4d' : '#FFFFFF',
-                          shadowColor: colorScheme === 'dark' ? '#000' : '#000',
-                          shadowOpacity: colorScheme === 'dark' ? 0.5 : 0.3,
-                        }
-                      ]}>
-                        <ThemedText style={[styles.markerText, {
-                          color: colorScheme === 'dark' ? '#FFFFFF' : '#FFFFFF',
-                          textShadowColor: colorScheme === 'dark' ? '#000' : 'rgba(0,0,0,0.3)',
-                          textShadowOffset: { width: 1, height: 1 },
-                          textShadowRadius: 2,
-                        }]}>P</ThemedText>
+                      <View style={styles.priceMarkerContainer}>
+                        <View
+                          style={[
+                            styles.priceMarkerBubble,
+                            {
+                              backgroundColor:
+                                activeSpotId === spot.id ? colors.primary : '#FFFFFF',
+                              borderColor:
+                                activeSpotId === spot.id ? colors.primary : '#E5E7EB',
+                            },
+                          ]}
+                        >
+                          <ThemedText
+                            style={[
+                              styles.priceMarkerText,
+                              { color: activeSpotId === spot.id ? colors.accent : '#111827' },
+                            ]}
+                          >
+                            {formatPriceLabel(spot.price)}
+                          </ThemedText>
+                        </View>
+                        <View
+                          style={[
+                            styles.priceMarkerArrow,
+                            {
+                              borderTopColor:
+                                activeSpotId === spot.id ? colors.primary : '#FFFFFF',
+                            },
+                          ]}
+                        />
                       </View>
                     </Marker>
                   ))}
@@ -416,9 +559,27 @@ export default function ExploreScreen() {
             <View style={styles.mapControls}>
               <TouchableOpacity 
                 style={[styles.mapControl, { backgroundColor: colors.background, borderColor: colors.border }]}
+                onPress={zoomIn}
+              >
+                <IconSymbol name="plus" size={18} color={colors.primary} />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.mapControl, { backgroundColor: colors.background, borderColor: colors.border, marginTop: 10 }]}
+                onPress={zoomOut}
+              >
+                <IconSymbol name="minus" size={18} color={colors.primary} />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.mapControl, { backgroundColor: colors.background, borderColor: colors.border, marginTop: 10 }]}
                 onPress={centerOnUserLocation}
               >
                 <IconSymbol name="location.fill" size={20} color={colors.primary} />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.mapControl, { backgroundColor: colors.background, borderColor: colors.border, marginTop: 10 }]}
+                onPress={() => setIsFullscreenMap(true)}
+              >
+                <IconSymbol name="arrow.up.left.and.arrow.down.right" size={18} color={colors.primary} />
               </TouchableOpacity>
             </View>
           </View>
@@ -504,6 +665,160 @@ export default function ExploreScreen() {
         onClose={handleModalClose}
         onNavigate={handleNavigation}
       />
+
+      {/* Reservation Details Modal */}
+      <ReservationDetails
+        visible={reservationDetailsVisible}
+        reservation={reservationDetailsData as any}
+        onBack={() => setReservationDetailsVisible(false)}
+      />
+
+      {/* Fullscreen Map Modal */}
+      <Modal visible={isFullscreenMap} animationType="slide" presentationStyle="fullScreen">
+        <View style={{ flex: 1, backgroundColor: colors.background }}> 
+
+          <View style={styles.fullscreenMapContainer}>
+            <MapView
+              ref={mapRef}
+              style={styles.fullscreenMap}
+              provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
+              initialRegion={{
+                latitude: location?.latitude || 40.4168,
+                longitude: location?.longitude || -3.7038,
+                latitudeDelta: 0.015,
+                longitudeDelta: 0.015,
+              }}
+              onRegionChangeComplete={(r) => setCurrentRegion(r)}
+              zoomEnabled={true}
+              zoomControlEnabled={Platform.OS === 'android'}
+              showsUserLocation={true}
+              showsMyLocationButton={false}
+              showsCompass={false}
+              showsScale={false}
+              mapType="standard"
+              customMapStyle={colorScheme === 'dark' ? getDarkMapStyle() : undefined}
+            >
+              {/* User location marker */}
+              {location && (
+                <Marker
+                  coordinate={{ latitude: location.latitude, longitude: location.longitude }}
+                  title="Tu ubicación"
+                  description="Estás aquí"
+                >
+                  <View style={[styles.userMarker, { backgroundColor: colors.primary, borderColor: colorScheme === 'dark' ? '#1d2c4d' : '#FFFFFF' }]}> 
+                    <View style={[styles.userMarkerInner, { backgroundColor: colors.accent }]} />
+                  </View>
+                </Marker>
+              )}
+
+              {/* Parking spots */}
+              {filteredSpots?.length > 0 && filteredSpots.map((spot) => (
+                <Marker
+                  key={spot.id}
+                  coordinate={{ latitude: spot.latitude, longitude: spot.longitude }}
+                  title={spot.address}
+                  description={`${spot.price} • ${getStatusText(spot.type)} • ${spot.distance}`}
+                  onPress={() => handleMarkerPress(spot)}
+                >
+                  <View style={styles.priceMarkerContainer}>
+                    <View
+                      style={[
+                        styles.priceMarkerBubble,
+                        {
+                          backgroundColor: activeSpotId === spot.id ? colors.primary : '#FFFFFF',
+                          borderColor: activeSpotId === spot.id ? colors.primary : '#E5E7EB',
+                        },
+                      ]}
+                    >
+                      <ThemedText
+                        style={[
+                          styles.priceMarkerText,
+                          { color: activeSpotId === spot.id ? colors.accent : '#111827' },
+                        ]}
+                      >
+                        {formatPriceLabel(spot.price)}
+                      </ThemedText>
+                    </View>
+                    <View
+                      style={[
+                        styles.priceMarkerArrow,
+                        { borderTopColor: activeSpotId === spot.id ? colors.primary : '#FFFFFF' },
+                      ]}
+                    />
+                  </View>
+                </Marker>
+              ))}
+            </MapView>
+
+            {/* Controls inside fullscreen */}
+            <View style={styles.mapControls}>
+              <TouchableOpacity 
+                style={[styles.mapControl, { backgroundColor: colors.background, borderColor: colors.border }]}
+                onPress={zoomIn}
+              >
+                <IconSymbol name="plus" size={18} color={colors.primary} />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.mapControl, { backgroundColor: colors.background, borderColor: colors.border, marginTop: 10 }]}
+                onPress={zoomOut}
+              >
+                <IconSymbol name="minus" size={18} color={colors.primary} />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.mapControl, { backgroundColor: colors.background, borderColor: colors.border, marginTop: 10 }]}
+                onPress={centerOnUserLocation}
+              >
+                <IconSymbol name="location.fill" size={20} color={colors.primary} />
+              </TouchableOpacity>
+            </View>
+
+            {/* Floating search + suggestions */}
+            <View pointerEvents="box-none" style={[styles.floatingOverlay, { top: insets.top + 6 }]}>
+              <View style={styles.floatingRow}>
+                <TouchableOpacity
+                  style={[styles.roundButton, { backgroundColor: '#FFFFFF' }]}
+                  onPress={() => setIsFullscreenMap(false)}
+                >
+                  <IconSymbol name="chevron.down" size={18} color="#111827" />
+                </TouchableOpacity>
+
+                <View style={styles.searchPill}>
+                  <IconSymbol name="magnifyingglass" size={18} color="#6B7280" />
+                  <TextInput
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    onFocus={() => setIsSearchActive(true)}
+                    onBlur={() => setIsSearchActive(false)}
+                    onSubmitEditing={handleSearchSubmit}
+                    placeholder="Buscar destino"
+                    placeholderTextColor="#9CA3AF"
+                    style={styles.searchPillInput}
+                    returnKeyType="search"
+                  />
+                </View>
+              </View>
+
+              {isSearchActive && (
+                <View style={styles.suggestionsCard}> 
+                  {nearbySuggestions.map((s, idx) => (
+                    <TouchableOpacity key={s.id} style={styles.suggestionRow} onPress={() => goToSuggestion(s)}>
+                      <View style={styles.suggestionIcon}>
+                        <IconSymbol name="mappin.and.ellipse" size={14} color="#2563EB" />
+                      </View>
+                      <View style={styles.suggestionTexts}>
+                        <ThemedText style={[styles.suggestionTitle, idx === 0 && { color: '#111827', fontWeight: '700' }]}>
+                          {s.title}
+                        </ThemedText>
+                        <ThemedText style={styles.suggestionSubtitle}>{s.subtitle}</ThemedText>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+            </View>
+            </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -559,6 +874,27 @@ function getMarkerColor(type: ParkingSpot['type'], colors: any) {
       return colors.error || '#ef4444';   // Rojo para ocupada
     default:
       return colors.primary || '#6366f1'; // Teal de la app
+  }
+}
+
+function formatPriceLabel(price: string) {
+  if (!price) return '';
+  try {
+    const normalized = price.replace(/\s/g, '');
+    const match = normalized.match(/([0-9]+(?:[\.,][0-9]{1,2})?)/);
+    if (!match) return price;
+    const numeric = parseFloat(match[1].replace(',', '.'));
+    if (Number.isNaN(numeric)) return price;
+    const isInteger = Math.abs(numeric - Math.round(numeric)) < 1e-9;
+    const formatter = new Intl.NumberFormat('es-ES', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: isInteger ? 0 : 2,
+      maximumFractionDigits: isInteger ? 0 : 2,
+    });
+    return formatter.format(numeric);
+  } catch (e) {
+    return price;
   }
 }
 

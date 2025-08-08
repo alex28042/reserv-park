@@ -7,9 +7,11 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { reservationModalStyles as styles } from './ReservationModal.styles';
 import { ThemedText } from './ThemedText';
 import { IconSymbol } from './ui/IconSymbol';
+import { useLocation } from '@/hooks/useLocation';
 
 interface ParkingSpot {
   id: string;
@@ -46,6 +48,7 @@ export function ReservationModal({ visible, spot, onClose, onNavigate }: Reserva
   const [currentStep, setCurrentStep] = useState<ReservationStep>('details');
   const [selectedDuration, setSelectedDuration] = useState(timeOptions[1]); // Default: 1 hora
   const [paymentMethod, setPaymentMethod] = useState('card');
+  const { location } = useLocation();
 
   if (!spot) return null;
 
@@ -109,6 +112,34 @@ export function ReservationModal({ visible, spot, onClose, onNavigate }: Reserva
 
   const renderDetailsStep = () => (
     <ScrollView style={styles.stepContent} showsVerticalScrollIndicator={false}>
+      {/* Map preview first */}
+      <View style={styles.mapPreviewWrapper}>
+        <MapView
+          style={styles.mapPreview}
+          provider={PROVIDER_GOOGLE}
+          initialRegion={{
+            latitude: spot.latitude,
+            longitude: spot.longitude,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          }}
+          showsUserLocation
+          showsMyLocationButton={false}
+          showsScale={false}
+          showsCompass={false}
+          mapType="standard"
+        >
+          {location && (
+            <Marker coordinate={{ latitude: location.latitude, longitude: location.longitude }} title="Tú" />
+          )}
+          <Marker coordinate={{ latitude: spot.latitude, longitude: spot.longitude }} title={spot.address}>
+            <View style={[styles.reservationMarker, { backgroundColor: colors.primary }]}>
+              <ThemedText style={styles.markerText}>P</ThemedText>
+            </View>
+          </Marker>
+        </MapView>
+      </View>
+
       <View style={styles.stepHeader}>
         <ThemedText style={[styles.stepTitle, { color: colors.text }]} type="title">
           Detalles de la Plaza
