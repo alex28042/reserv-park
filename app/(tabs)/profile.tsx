@@ -13,6 +13,7 @@ import { VehiclesModal } from '@/components/profile/VehiclesModal';
 import { ThemedText } from '@/components/ThemedText';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
+import { useAuth } from '@/contexts/AuthContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 interface QuickActionProps {
@@ -34,6 +35,7 @@ interface SettingsItemProps {
 export default function ProfileScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const { signOut, user } = useAuth();
   const [visibleModal, setVisibleModal] = useState<
     'vehicles' | 'payments' | 'history' | 'notifications' | 'settings' | 'help' | 'about' | null
   >(null);
@@ -88,11 +90,11 @@ export default function ProfileScreen() {
                 <IconSymbol name="person.fill" size={32} color={colors.accent} />
               </View>
               <View style={styles.userInfo}>
-                <ThemedText style={[styles.userName, { color: colors.text }]} type="defaultSemiBold">
-                  Alex Alonso
+              <ThemedText style={[styles.userName, { color: colors.text }]} type="defaultSemiBold">
+                  {user?.email ?? 'Usuario'}
                 </ThemedText>
                 <ThemedText style={[styles.userEmail, { color: colors.text }]}>
-                  alex.alonso@reservpark.com
+                  {user?.email ?? ''}
                 </ThemedText>
                 <View style={styles.userStats}>
                   <View style={styles.statItem}>
@@ -245,7 +247,7 @@ export default function ProfileScreen() {
                 '¿Estás seguro de que quieres cerrar sesión?',
                 [
                   { text: 'Cancelar', style: 'cancel' },
-                  { text: 'Cerrar Sesión', style: 'destructive' }
+                  { text: 'Cerrar Sesión', style: 'destructive', onPress: () => signOut() }
                 ]
               )}
             />

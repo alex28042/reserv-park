@@ -44,7 +44,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#003346"
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "splash": {
       "image": "./assets/images/reservpark-logo.jpeg",
