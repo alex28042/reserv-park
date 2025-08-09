@@ -12,15 +12,11 @@ export default function WelcomeScreen() {
   const colors = Colors[scheme ?? 'light'];
   const insets = useSafeAreaInsets();
 
-  const gradientColors = (scheme === 'dark'
-    ? [colors.background, colors.primary]
-    : [colors.primary, colors.secondary]) as const;
-
   return (
     <SafeAreaView style={[styles.container]}> 
       {/* Background gradient (hero) */}
       <LinearGradient
-        colors={gradientColors}
+        colors={scheme === 'dark' ? [colors.background, colors.primary] : [colors.primary, colors.secondary]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFillObject}

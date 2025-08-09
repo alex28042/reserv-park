@@ -4,7 +4,6 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, SafeAreaView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 
 export default function CreateAccountEmailScreen() {
   const scheme = useColorScheme();
@@ -22,12 +21,6 @@ export default function CreateAccountEmailScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}> 
-      <LinearGradient
-        colors={scheme === 'dark' ? ['#0f2027', '#203a43'] : ['#f8fafc', '#ffffff']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={StyleSheet.absoluteFillObject}
-      />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <View style={styles.headerRow}>
           <ThemedText style={[styles.step, { color: colors.text }]}>Paso 1 / 3</ThemedText>

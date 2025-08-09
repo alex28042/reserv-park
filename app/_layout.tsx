@@ -39,7 +39,6 @@ function RootLayoutNav() {
           <>
             <Stack.Screen name="welcome" />
             <Stack.Screen name="login" />
-            <Stack.Screen name="register" />
             <Stack.Screen name="create-account" />
             <Stack.Screen name="create-account-email" />
             <Stack.Screen name="verify-email" />
