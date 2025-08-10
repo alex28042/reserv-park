@@ -10,6 +10,7 @@ import { NotificationsModal } from '@/components/profile/NotificationsModal';
 import { PaymentsModal } from '@/components/profile/PaymentsModal';
 import { SettingsModal } from '@/components/profile/SettingsModal';
 import { VehiclesModal } from '@/components/profile/VehiclesModal';
+import { WorkScheduleModal } from '@/components/profile/WorkScheduleModal';
 import { ThemedText } from '@/components/ThemedText';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
@@ -37,7 +38,7 @@ export default function ProfileScreen() {
   const colors = Colors[colorScheme ?? 'light'];
   const { signOut, user } = useAuth();
   const [visibleModal, setVisibleModal] = useState<
-    'vehicles' | 'payments' | 'history' | 'notifications' | 'settings' | 'help' | 'about' | null
+    'vehicles' | 'payments' | 'history' | 'notifications' | 'settings' | 'help' | 'about' | 'workSchedule' | null
   >(null);
   const [editVisible, setEditVisible] = useState(false);
   const [userName, setUserName] = useState('Alex Alonso');
@@ -144,6 +145,12 @@ export default function ProfileScreen() {
               onPress={() => setVisibleModal('history')}
             />
             <SettingsItem 
+              title="Horario de trabajo"
+              subtitle="Reserva/cede tu plaza automáticamente"
+              icon="gearshape.fill"
+              onPress={() => setVisibleModal('workSchedule')}
+            />
+            <SettingsItem 
               title="Notificaciones"
               subtitle="Gestionar alertas y avisos"
               icon="bell.fill"
@@ -186,6 +193,7 @@ export default function ProfileScreen() {
       <SettingsModal visible={visibleModal === 'settings'} onClose={() => setVisibleModal(null)} />
       <HelpModal visible={visibleModal === 'help'} onClose={() => setVisibleModal(null)} />
       <AboutModal visible={visibleModal === 'about'} onClose={() => setVisibleModal(null)} />
+      <WorkScheduleModal visible={visibleModal === 'workSchedule'} onClose={() => setVisibleModal(null)} />
       <EditProfileModal 
         visible={editVisible}
         name={userName}
