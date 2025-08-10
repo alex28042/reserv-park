@@ -20,6 +20,12 @@ export default function HomeScreen() {
       return;
     }
     
+    // Ofrecer plaza: abrir el modal en Explorar
+    if (feature === 'Ofrecer' || feature === 'Compartir plaza' || feature === 'Ofrecer mi plaza') {
+      router.push('/(tabs)/explore?openOffer=1');
+      return;
+    }
+
     // Para otras funcionalidades, mostrar mensaje de desarrollo
     Alert.alert(
       'Funcionalidad en desarrollo',

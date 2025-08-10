@@ -236,12 +236,12 @@ export function OfferSpotModal({ visible, onClose, onSubmit }: OfferSpotModalPro
         {/* Footer */}
         <View style={styles.footer}>
           <TouchableOpacity
-            style={[styles.publishButton, { backgroundColor: canSubmit ? colors.primary : colors.border }]}
+            style={[styles.publishButton, { backgroundColor: colors.primary, opacity: canSubmit ? 1 : 0.6 }]}
             disabled={!canSubmit}
             onPress={handlePublish}
           >
-            <IconSymbol name="paperplane.fill" size={18} color={colors.accent} />
-            <ThemedText style={[styles.publishText, { color: colors.accent }]} type="defaultSemiBold">Publicar</ThemedText>
+            <IconSymbol name="paperplane.fill" size={18} color="#FFFFFF" />
+            <ThemedText style={[styles.publishText, { color: '#FFFFFF' }]} type="defaultSemiBold">Publicar</ThemedText>
           </TouchableOpacity>
         </View>
       </View>

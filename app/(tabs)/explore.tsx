@@ -1,3 +1,4 @@
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Linking, Modal, Platform, ScrollView, TextInput, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE, Region } from 'react-native-maps';
@@ -88,6 +89,8 @@ export default function ExploreScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const insets = useSafeAreaInsets();
+  const router = useRouter();
+  const params = useLocalSearchParams<{ openOffer?: string }>();
   const [selectedFilter, setSelectedFilter] = useState<'available' | 'all'>('available');
   const [spots, setSpots] = useState<ParkingSpot[]>(initialSpots);
   const [mapView, setMapView] = useState(true);
@@ -132,6 +135,17 @@ export default function ExploreScreen() {
       }, 1000);
     }
   }, [location]);
+
+  // Open Offer modal if requested from Home via query param
+  useEffect(() => {
+    if (params?.openOffer === '1' || params?.openOffer === 'true') {
+      setOfferModalVisible(true);
+      // Clean the URL to avoid reopening on re-render
+      try {
+        router.replace('/(tabs)/explore');
+      } catch {}
+    }
+  }, [params?.openOffer]);
 
   const filteredSpots = React.useMemo(() => {
     if (!spots || !Array.isArray(spots)) {
