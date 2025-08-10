@@ -6,22 +6,25 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useMemo, useRef, useState } from 'react';
 import { Alert, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
+const CODE_LENGTH = 6;
+
 export default function VerifyEmailScreen() {
   const scheme = useColorScheme();
   const colors = Colors[scheme ?? 'light'];
   const { email } = useLocalSearchParams<{ email?: string }>();
-  const [code, setCode] = useState<string[]>(['', '', '', '', '']);
+  const [code, setCode] = useState<string[]>(Array(CODE_LENGTH).fill(''));
   const router = useRouter();
   const inputsRef = useRef<Array<TextInput | null>>([]);
 
   const displayEmail = useMemo(() => (email ?? '').toString(), [email]);
 
   const handleVerify = () => {
-    if (code.join('').length < 5) {
-      Alert.alert('Código incompleto', 'Introduce el código de 5 dígitos');
+    if (code.join('').length < CODE_LENGTH) {
+      Alert.alert('Código incompleto', `Introduce el código de ${CODE_LENGTH} dígitos`);
       return;
     }
-    router.push('/set-password');
+    // Para demo: tras verificar, enviamos a login
+    router.replace('/login');
   };
 
   return (
@@ -42,7 +45,7 @@ export default function VerifyEmailScreen() {
       </View>
 
       <View style={[styles.card, { backgroundColor: colors.surface }]}> 
-        <Text style={[styles.helperText, { color: colors.text, opacity: 0.8 }]}>Te enviamos un código de 5 dígitos a {displayEmail || 'tu correo'}</Text>
+        <Text style={[styles.helperText, { color: colors.text, opacity: 0.8 }]}>Te enviamos un código de {CODE_LENGTH} dígitos a {displayEmail || 'tu correo'}</Text>
 
         <View style={styles.codeRow}>
           {code.map((c, i) => (
@@ -57,7 +60,13 @@ export default function VerifyEmailScreen() {
                 const next = [...code];
                 next[i] = val;
                 setCode(next);
-                if (val && i < code.length - 1) inputsRef.current[i + 1]?.focus();
+                if (val && i < code.length - 1) {
+                  inputsRef.current[i + 1]?.focus();
+                }
+                if (val && i === code.length - 1) {
+                  // Auto-verify when all digits are filled
+                  setTimeout(handleVerify, 50);
+                }
               }}
               onKeyPress={({ nativeEvent }) => {
                 if (nativeEvent.key === 'Backspace' && code[i] === '' && i > 0) {
