@@ -4,7 +4,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useMemo, useRef, useState } from 'react';
-import { Alert, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const CODE_LENGTH = 6;
 
@@ -17,13 +17,12 @@ export default function VerifyEmailScreen() {
   const inputsRef = useRef<Array<TextInput | null>>([]);
 
   const displayEmail = useMemo(() => (email ?? '').toString(), [email]);
+  const isComplete = useMemo(() => code.every((d) => d && d.length === 1), [code]);
 
-  const handleVerify = () => {
-    if (code.join('').length < CODE_LENGTH) {
-      Alert.alert('Código incompleto', `Introduce el código de ${CODE_LENGTH} dígitos`);
-      return;
-    }
-    // Para demo: tras verificar, enviamos a login
+  const handleVerify = (incoming?: string[]) => {
+    const arr = incoming ?? code;
+    const complete = arr.every((d) => d && d.length === 1);
+    if (!complete) return;
     router.replace('/login');
   };
 
@@ -65,7 +64,7 @@ export default function VerifyEmailScreen() {
                 }
                 if (val && i === code.length - 1) {
                   // Auto-verify when all digits are filled
-                  setTimeout(handleVerify, 50);
+                  setTimeout(() => handleVerify(next), 10);
                 }
               }}
               onKeyPress={({ nativeEvent }) => {
@@ -78,7 +77,7 @@ export default function VerifyEmailScreen() {
           ))}
         </View>
 
-        <TouchableOpacity style={[styles.primaryButton, { backgroundColor: colors.primary }]} onPress={handleVerify}>
+        <TouchableOpacity style={[styles.primaryButton, { backgroundColor: colors.primary, opacity: isComplete ? 1 : 0.6 }]} onPress={() => handleVerify()} disabled={!isComplete}>
           <ThemedText style={[styles.primaryText, { color: colors.accent }]} type="defaultSemiBold">Verificar email</ThemedText>
         </TouchableOpacity>
 

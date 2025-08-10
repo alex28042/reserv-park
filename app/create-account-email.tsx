@@ -23,6 +23,7 @@ export default function CreateAccountEmailScreen() {
   const router = useRouter();
   const { signUp } = useAuth();
   const inputsRef = useRef<Array<TextInput | null>>([]);
+  const isCodeComplete = useMemo(() => code.every((d) => d && d.length === 1), [code]);
   const contentOpacity = useRef(new Animated.Value(1)).current;
   const contentTranslateX = useRef(new Animated.Value(0)).current;
   const prevStep = useRef<1 | 2 | 3>(1);
@@ -85,11 +86,7 @@ export default function CreateAccountEmailScreen() {
   };
 
   const handleVerify = () => {
-    if (code.join('').length < 6) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      Alert.alert('Código incompleto', 'Introduce el código de 6 dígitos');
-      return;
-    }
+    if (code.join('').length < 6) return; // no popup
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     goNext();
   };
@@ -237,7 +234,11 @@ export default function CreateAccountEmailScreen() {
                   />
                 ))}
               </View>
-              <TouchableOpacity style={[styles.primaryButton, { backgroundColor: colors.primary }]} onPress={handleVerify}>
+              <TouchableOpacity
+                style={[styles.primaryButton, { backgroundColor: colors.primary, opacity: isCodeComplete ? 1 : 0.6 }]}
+                onPress={handleVerify}
+                disabled={!isCodeComplete}
+              >
                 <ThemedText style={[styles.primaryText, { color: colors.accent }]} type="defaultSemiBold">Verificar email</ThemedText>
               </TouchableOpacity>
               <View style={styles.resendRow}>
