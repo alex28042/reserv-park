@@ -275,12 +275,17 @@ export const reservationModalStyles = StyleSheet.create({
     gap: 12,
     width: '100%',
   },
+  singleAction: {
+    paddingTop: 8,
+    width: '100%',
+  },
   primaryButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 16,
+    minHeight: 52,
     borderRadius: 12,
     gap: 8,
   },

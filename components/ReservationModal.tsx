@@ -8,6 +8,7 @@ import {
     Modal,
     Platform,
     ScrollView,
+    Text,
     TouchableOpacity,
     View
 } from 'react-native';
@@ -461,9 +462,7 @@ export function ReservationModal({ visible, spot, onClose, onNavigate }: Reserva
             style={[styles.secondaryButton, { borderColor: colors.border }]}
             onPress={handleClose}
           >
-            <ThemedText style={[styles.buttonText, { color: colors.text }]}>
-              Más tarde
-            </ThemedText>
+            <ThemedText style={[styles.buttonText, { color: colors.text }]}>Más tarde</ThemedText>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.primaryButton, { backgroundColor: colors.primary }]}
@@ -476,21 +475,20 @@ export function ReservationModal({ visible, spot, onClose, onNavigate }: Reserva
           </TouchableOpacity>
         </View>
 
-        <View style={styles.successActions}>
+        <View style={styles.singleAction}>
           <TouchableOpacity
-            style={[styles.secondaryButton, { borderColor: colors.border }]}
-            onPress={openWithWaze}
-          >
-            <ThemedText style={[styles.buttonText, { color: colors.text }]}>Abrir en Waze</ThemedText>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.primaryButton, { backgroundColor: colors.secondary ?? colors.primary }]}
+            style={[styles.primaryButton, { backgroundColor: colors.secondary ?? colors.primary, width: '100%' }]}
             onPress={openChat}
           >
-            <IconSymbol name="message.fill" size={16} color={colors.accent} />
-            <ThemedText style={[styles.buttonText, { color: colors.accent }]} type="defaultSemiBold">
+            <IconSymbol name="message.fill" size={18} color={colors.accent} />
+            <Text
+              accessibilityRole="button"
+              style={{ color: '#FFFFFF', fontSize: 17, fontWeight: '700' }}
+              numberOfLines={1}
+              allowFontScaling
+            >
               Chatear con propietario
-            </ThemedText>
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
