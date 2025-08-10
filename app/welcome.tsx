@@ -13,8 +13,8 @@ export default function WelcomeScreen() {
   const insets = useSafeAreaInsets();
 
   return (
-    <SafeAreaView style={[styles.container]}> 
-      {/* Background gradient (hero) */}
+    <SafeAreaView style={styles.container}> 
+      {/* Background gradient */}
       <LinearGradient
         colors={scheme === 'dark' ? [colors.background, colors.primary] : [colors.primary, colors.secondary]}
         start={{ x: 0, y: 0 }}
@@ -22,29 +22,39 @@ export default function WelcomeScreen() {
         style={StyleSheet.absoluteFillObject}
       />
 
-      {/* Bottom hero content */}
-      <View style={[styles.hero, { paddingBottom: Math.max(28, insets.bottom + 18) }]}> 
-        <Image
-          source={require('../assets/images/reservpark-logo.jpeg')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-        <ThemedText style={[styles.title, { color: colors.accent }]} type="title">Bienvenido a ReservPark</ThemedText>
-        <ThemedText style={[styles.subtitle, { color: colors.accent }]}>Encuentra plazas cerca de ti y comparte la tuya fácilmente</ThemedText>
+      {/* Content */}
+      <View style={styles.content}>
+        {/* Logo Section */}
+        <View style={styles.logoSection}>
+          <Image
+            source={require('../assets/images/reservpark-logo.jpeg')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        </View>
 
-        <Link href="/create-account" asChild>
-          <TouchableOpacity style={styles.primaryCta}>
-            <ThemedText style={styles.primaryCtaText} type="defaultSemiBold">Crear una cuenta</ThemedText>
-          </TouchableOpacity>
-        </Link>
+        {/* Text Section */}
+        <View style={styles.textSection}>
+          <ThemedText style={[styles.title, { color: colors.accent }]}>Bienvenido a ReservPark</ThemedText>
+          <ThemedText style={[styles.subtitle, { color: colors.accent }]}>Encuentra plazas cerca de ti y comparte la tuya fácilmente</ThemedText>
+        </View>
 
-        <View style={styles.loginRow}>
-          <ThemedText style={styles.loginText}>¿Ya tienes cuenta?</ThemedText>
-          <Link href="/login" asChild>
-            <TouchableOpacity>
-              <ThemedText style={styles.loginLink} type="defaultSemiBold"> Inicia sesión</ThemedText>
+        {/* Buttons Section */}
+        <View style={styles.buttonSection}>
+          <Link href="/create-account" asChild>
+            <TouchableOpacity style={styles.primaryButton}>
+              <ThemedText style={styles.primaryButtonText}>Crear una cuenta</ThemedText>
             </TouchableOpacity>
           </Link>
+
+          <View style={styles.loginRow}>
+            <ThemedText style={[styles.loginText, { color: colors.accent }]}>¿Ya tienes cuenta?</ThemedText>
+            <Link href="/login" asChild>
+              <TouchableOpacity>
+                <ThemedText style={[styles.loginLink, { color: colors.accent }]}> Inicia sesión</ThemedText>
+              </TouchableOpacity>
+            </Link>
+          </View>
         </View>
       </View>
     </SafeAreaView>
@@ -52,16 +62,82 @@ export default function WelcomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  hero: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: 20, alignItems: 'center', gap: 14 },
-  title: { fontSize: 30, textAlign: 'center', lineHeight: 36 },
-  subtitle: { fontSize: 16, textAlign: 'center' },
-  primaryCta: { marginTop: 6, width: '100%', backgroundColor: '#FFFFFF', paddingVertical: 14, borderRadius: 14, alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 10, shadowOffset: { width: 0, height: 6 }, elevation: 6 },
-  primaryCtaText: { color: '#111827', fontSize: 16 },
-  loginRow: { flexDirection: 'row', alignItems: 'center' },
-  loginText: { color: 'rgba(255,255,255,0.9)', fontSize: 14 },
-  loginLink: { color: '#FFFFFF', fontSize: 14 },
-  logo: { width: 120, height: 60 },
+  container: { 
+    flex: 1 
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 24,
+    justifyContent: 'space-between',
+    paddingTop: 60,
+    paddingBottom: 40
+  },
+  logoSection: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    marginTop: -40
+  },
+  logo: { 
+    width: 150, 
+    height: 150,
+    borderRadius: 12,
+    marginBottom: 20
+  },
+  textSection: {
+    alignItems: 'center',
+    marginBottom: 40
+  },
+  title: { 
+    fontSize: 32, 
+    fontWeight: '700',
+    textAlign: 'center', 
+    marginBottom: 16,
+    lineHeight: 40
+  },
+  subtitle: { 
+    fontSize: 18, 
+    textAlign: 'center',
+    lineHeight: 26,
+    paddingHorizontal: 20,
+    opacity: 0.9
+  },
+  buttonSection: {
+    gap: 16
+  },
+  primaryButton: { 
+    width: '100%', 
+    backgroundColor: 'white',
+    paddingVertical: 16, 
+    borderRadius: 16, 
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6
+  },
+  primaryButtonText: { 
+    color: '#059669',
+    fontSize: 16,
+    fontWeight: '700',
+    textAlign: 'center'
+  },
+  loginRow: { 
+    flexDirection: 'row', 
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  loginText: { 
+    fontSize: 16,
+    opacity: 0.9
+  },
+  loginLink: { 
+    fontSize: 16,
+    fontWeight: '600',
+    textDecorationLine: 'underline'
+  },
 });
 
 
