@@ -639,7 +639,7 @@ export default function ExploreScreen() {
                         longitude: Number.isFinite(spot.longitude) ? spot.longitude : 0,
                       }}
                       title={spot.address}
-                      description={`${spot.price} • ${spot.timeLeft} • ${spot.distance}`}
+                      description={`${spot.timeLeft} • ${spot.distance}`}
                       onPress={() => handleMarkerPress(spot)}
                     >
                       <View style={styles.priceMarkerContainer}>
@@ -660,9 +660,7 @@ export default function ExploreScreen() {
                               { color: activeSpotId === spot.id ? colors.accent : '#111827' },
                             ]}
                           >
-                            {spot.isOffer && typeof spot.availableInMinutes === 'number' && spot.availableInMinutes > 0
-                              ? `${spot.availableInMinutes}m`
-                              : formatPriceLabel(spot.price)}
+                            P
                           </ThemedText>
                         </View>
                         <View
@@ -865,7 +863,7 @@ export default function ExploreScreen() {
                   key={spot.id}
                   coordinate={{ latitude: spot.latitude, longitude: spot.longitude }}
                   title={spot.address}
-                  description={`${spot.price} • ${spot.timeLeft} • ${spot.distance}`}
+                  description={`${spot.timeLeft} • ${spot.distance}`}
                   onPress={() => handleMarkerPress(spot)}
                 >
                   <View style={styles.priceMarkerContainer}>
@@ -884,9 +882,7 @@ export default function ExploreScreen() {
                           { color: activeSpotId === spot.id ? colors.accent : '#111827' },
                         ]}
                       >
-                        {spot.isOffer && spot.availableInMinutes && spot.availableInMinutes > 0
-                          ? `${spot.availableInMinutes}m`
-                          : formatPriceLabel(spot.price)}
+                        P
                       </ThemedText>
                     </View>
                     <View

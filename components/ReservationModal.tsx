@@ -1,17 +1,20 @@
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useLocation } from '@/hooks/useLocation';
 import React, { useState } from 'react';
 import {
-  Modal,
-  ScrollView,
-  TouchableOpacity,
-  View
+    Alert,
+    Linking,
+    Modal,
+    Platform,
+    ScrollView,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { reservationModalStyles as styles } from './ReservationModal.styles';
 import { ThemedText } from './ThemedText';
 import { IconSymbol } from './ui/IconSymbol';
-import { useLocation } from '@/hooks/useLocation';
 
 interface ParkingSpot {
   id: string;
@@ -63,9 +66,53 @@ export function ReservationModal({ visible, spot, onClose, onNavigate }: Reserva
     onClose();
   };
 
-  const calculatePrice = () => {
-    const basePrice = parseFloat(spot.price.replace(/[€\/hora]/g, ''));
-    return (basePrice * selectedDuration.multiplier).toFixed(2);
+  const getFixedPrice = () => {
+    try {
+      const numeric = parseFloat(String(spot.price).replace(/[^0-9.,]/g, '').replace(',', '.'));
+      return Number.isFinite(numeric) ? numeric.toFixed(2) : '0.00';
+    } catch {
+      return '0.00';
+    }
+  };
+
+  const calculatePrice = () => getFixedPrice();
+
+  const openWithAppleOrGoogleMaps = async () => {
+    try {
+      const destination = `${spot.latitude},${spot.longitude}`;
+      if (Platform.OS === 'ios') {
+        const appleUrl = `maps://maps.apple.com/?q=${encodeURIComponent(spot.address)}&ll=${destination}`;
+        const canApple = await Linking.canOpenURL(appleUrl);
+        if (canApple) {
+          await Linking.openURL(appleUrl);
+          return;
+        }
+      }
+      const gmapsWeb = `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`;
+      await Linking.openURL(gmapsWeb);
+    } catch (e) {
+      Alert.alert('Error', 'No se pudo abrir Maps');
+    }
+  };
+
+  const openWithWaze = async () => {
+    try {
+      const destination = `${spot.latitude},${spot.longitude}`;
+      const wazeUrl = `waze://?ll=${destination}&navigate=yes`;
+      const canWaze = await Linking.canOpenURL(wazeUrl);
+      if (canWaze) {
+        await Linking.openURL(wazeUrl);
+      } else {
+        const wazeWeb = `https://waze.com/ul?ll=${destination}&navigate=yes`;
+        await Linking.openURL(wazeWeb);
+      }
+    } catch (e) {
+      Alert.alert('Error', 'No se pudo abrir Waze');
+    }
+  };
+
+  const openChat = () => {
+    Alert.alert('Chat', 'Abriremos un chat con el propietario (demo)');
   };
 
   const getStepNumber = (step: ReservationStep): number => {
@@ -243,7 +290,7 @@ export function ReservationModal({ visible, spot, onClose, onNavigate }: Reserva
                 },
               ]}
             >
-              €{(parseFloat(spot.price.replace(/[€\/hora]/g, '')) * option.multiplier).toFixed(2)}
+              Precio fijo
             </ThemedText>
           </TouchableOpacity>
         ))}
@@ -420,14 +467,29 @@ export function ReservationModal({ visible, spot, onClose, onNavigate }: Reserva
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.primaryButton, { backgroundColor: colors.primary }]}
-            onPress={() => {
-              onNavigate(spot.latitude, spot.longitude, spot.address);
-              handleClose();
-            }}
+            onPress={openWithAppleOrGoogleMaps}
           >
-            <IconSymbol name="location.fill" size={16} color={colors.accent} />
+            <IconSymbol name="map.fill" size={16} color={colors.accent} />
             <ThemedText style={[styles.buttonText, { color: colors.accent }]} type="defaultSemiBold">
-              Navegar Ahora
+              Abrir en Maps
+            </ThemedText>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.successActions}>
+          <TouchableOpacity
+            style={[styles.secondaryButton, { borderColor: colors.border }]}
+            onPress={openWithWaze}
+          >
+            <ThemedText style={[styles.buttonText, { color: colors.text }]}>Abrir en Waze</ThemedText>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.primaryButton, { backgroundColor: colors.secondary ?? colors.primary }]}
+            onPress={openChat}
+          >
+            <IconSymbol name="message.fill" size={16} color={colors.accent} />
+            <ThemedText style={[styles.buttonText, { color: colors.accent }]} type="defaultSemiBold">
+              Chatear con propietario
             </ThemedText>
           </TouchableOpacity>
         </View>
