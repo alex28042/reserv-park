@@ -34,20 +34,14 @@ function RootLayoutNav() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack initialRouteName={isAuthenticated ? '(tabs)' : 'welcome'} screenOptions={{ headerShown: false }}>
-        {!isAuthenticated ? (
-          <>
-            <Stack.Screen name="welcome" />
-            <Stack.Screen name="login" />
-            <Stack.Screen name="create-account" />
-            <Stack.Screen name="create-account-email" />
-            <Stack.Screen name="verify-email" />
-            <Stack.Screen name="set-password" />
-          </>
-        ) : null}
-        {isAuthenticated ? (
-          <Stack.Screen name="(tabs)" />
-        ) : null}
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="welcome" />
+        <Stack.Screen name="login" />
+        <Stack.Screen name="create-account" />
+        <Stack.Screen name="create-account-email" />
+        <Stack.Screen name="verify-email" />
+        <Stack.Screen name="(tabs)" />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />

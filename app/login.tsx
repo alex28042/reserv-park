@@ -5,7 +5,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, Image, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function LoginScreen() {
   const { signIn } = useAuth();
@@ -20,9 +20,15 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     try {
       setLoading(true);
+      console.log('Iniciando login...');
       await signIn(email.trim(), password);
-      router.replace('/(tabs)');
+      console.log('Login exitoso!');
+      // Forzar redirección manual
+      setTimeout(() => {
+        router.replace('/(tabs)');
+      }, 100);
     } catch (e) {
+      console.error('Error en login:', e);
       Alert.alert('Error', 'No se pudo iniciar sesión');
     } finally {
       setLoading(false);
@@ -34,64 +40,70 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}> 
-      <View style={styles.header}> 
-        <Image 
-          source={require('../assets/images/reservpark-logo.jpeg')} 
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      </View>
-
-      <View style={styles.card}> 
-        <ThemedText style={[styles.title, { color: colors.text }]}>Iniciar sesión</ThemedText>
-        
-        <View style={styles.inputContainer}>
-          <TextInput
-            placeholder="Email"
-            placeholderTextColor="#94A3B8"
-            autoCapitalize="none"
-            keyboardType="email-address"
-            value={email}
-            onChangeText={setEmail}
-            style={[styles.input, { color: colors.text, borderColor: '#E5E7EB' }]}
-          />
-        </View>
-        
-        <View style={styles.inputContainer}>
-          <View style={styles.passwordContainer}>
-            <TextInput
-              placeholder="Contraseña"
-              placeholderTextColor="#94A3B8"
-              secureTextEntry={!showPassword}
-              value={password}
-              onChangeText={setPassword}
-              style={[styles.input, styles.passwordInput, { color: colors.text, borderColor: '#E5E7EB' }]}
-            />
-            <TouchableOpacity 
-              style={styles.eyeIcon}
-              onPress={() => setShowPassword(!showPassword)}
-            >
-              <Ionicons 
-                name={showPassword ? 'eye-off' : 'eye'} 
-                size={22} 
-                color="#6B7280"
-              />
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}> 
+      <View style={styles.content}> 
+        <View style={[styles.card, { backgroundColor: colors.surface }]}> 
+          <View style={styles.cardHeader}>
+            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+              <Ionicons name="chevron-back" size={20} color={colors.text} />
             </TouchableOpacity>
+            <ThemedText style={[styles.title, { color: colors.text }]} type="title">Iniciar sesión</ThemedText>
+            <View style={{ width: 20 }} />
           </View>
+          
+          <ThemedText style={[styles.subtitle, { color: colors.text, opacity: 0.8 }]}>
+            Introduce tus credenciales para acceder a tu cuenta
+          </ThemedText>
+        
+          <View style={styles.inputContainer}>
+            <TextInput
+              placeholder="Email"
+              placeholderTextColor={scheme === 'dark' ? '#94A3B8' : '#94A3B8'}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              value={email}
+              onChangeText={setEmail}
+              style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
+            />
+          </View>
+          
+          <View style={styles.inputContainer}>
+            <View style={styles.passwordContainer}>
+              <TextInput
+                placeholder="Contraseña"
+                placeholderTextColor={scheme === 'dark' ? '#94A3B8' : '#94A3B8'}
+                secureTextEntry={!showPassword}
+                value={password}
+                onChangeText={setPassword}
+                style={[styles.input, styles.passwordInput, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
+              />
+              <TouchableOpacity 
+                style={styles.eyeIcon}
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                <Ionicons 
+                  name={showPassword ? 'eye-off' : 'eye'} 
+                  size={22} 
+                  color={colors.text}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+          
+          <TouchableOpacity onPress={handleForgotPassword}>
+            <Text style={[styles.forgotText, { color: colors.primary }]}>¿Olvidaste tu contraseña?</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[styles.primaryButton, { backgroundColor: colors.primary }, loading && { opacity: 0.7 }]} 
+            onPress={handleLogin} 
+            disabled={loading}
+          >
+            <ThemedText style={[styles.primaryText, { color: colors.accent }]} type="defaultSemiBold">
+              {loading ? 'Entrando…' : 'Entrar'}
+            </ThemedText>
+          </TouchableOpacity>
         </View>
-        
-        <TouchableOpacity onPress={handleForgotPassword}>
-          <Text style={[styles.forgotText, { color: colors.primary }]}>¿Olvidaste tu contraseña?</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[styles.button, { backgroundColor: colors.primary }, loading && { opacity: 0.7 }]} 
-          onPress={handleLogin} 
-          disabled={loading}
-        >
-          <Text style={[styles.buttonText, { color: 'white' }]}>{loading ? 'Entrando…' : 'Entrar'}</Text>
-        </TouchableOpacity>
       </View>
 
       <View style={styles.footer}> 
@@ -106,71 +118,74 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: { 
     flex: 1, 
-    padding: 24, 
-    justifyContent: 'center',
-    backgroundColor: '#FAFAFA'
+    padding: 16 
   },
-  header: { 
-    alignItems: 'center', 
-    marginBottom: 40 
+  content: { 
+    flex: 1, 
+    justifyContent: 'flex-start' 
   },
-  logo: { 
-    width: 150, 
-    height: 150, 
-    marginBottom: 30,
-    borderRadius: 12
-  },
-
   card: { 
-    backgroundColor: 'white',
-    borderRadius: 20, 
-    padding: 24, 
-    marginHorizontal: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3
+    gap: 12, 
+    borderRadius: 24, 
+    padding: 20, 
+    shadowColor: '#000', 
+    shadowOpacity: 0.06, 
+    shadowRadius: 14, 
+    shadowOffset: { width: 0, height: 8 }, 
+    elevation: 2 
+  },
+  cardHeader: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'space-between', 
+    paddingBottom: 4 
+  },
+  backButton: { 
+    width: 32, 
+    height: 32, 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    borderRadius: 16 
   },
   title: { 
-    fontSize: 24, 
-    fontWeight: '700',
-    marginBottom: 24, 
-    textAlign: 'center' 
+    fontSize: 26 
+  },
+  subtitle: { 
+    fontSize: 14, 
+    opacity: 0.8 
   },
   inputContainer: {
     marginBottom: 16
   },
   input: { 
-    borderWidth: 1.5, 
-    borderRadius: 16, 
+    height: 52,
+    borderWidth: 1, 
+    borderRadius: 14, 
     paddingHorizontal: 16, 
-    paddingVertical: 16,
-    fontSize: 16,
-    backgroundColor: '#F8F9FA'
+    fontSize: 16
   },
-  button: { 
-    paddingVertical: 16, 
-    borderRadius: 16, 
+  primaryButton: { 
+    height: 52, 
+    borderRadius: 20, 
     alignItems: 'center', 
-    marginTop: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 2
+    justifyContent: 'center', 
+    shadowColor: '#000', 
+    shadowOpacity: 0.12, 
+    shadowRadius: 10, 
+    shadowOffset: { width: 0, height: 6 }, 
+    elevation: 4 
   },
-  buttonText: { 
-    fontWeight: '700', 
+  primaryText: { 
     fontSize: 16 
   },
   footer: { 
     alignItems: 'center', 
-    marginTop: 32 
+    marginTop: 12, 
+    marginBottom: 8 
   },
   footerText: { 
-    fontWeight: '600',
-    fontSize: 16
+    fontSize: 12,
+    fontWeight: '700'
   },
   passwordContainer: { 
     position: 'relative' 
@@ -181,7 +196,7 @@ const styles = StyleSheet.create({
   eyeIcon: { 
     position: 'absolute', 
     right: 16, 
-    top: 16, 
+    top: 14, 
     zIndex: 1,
     padding: 4
   },

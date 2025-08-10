@@ -5,18 +5,23 @@ import { Platform } from 'react-native';
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
+import { useAuth } from '@/contexts/AuthContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const { isAuthenticated } = useAuth();
 
-  // Guard: if not authenticated (mock), force welcome (run each render)
+  // Guard: if not authenticated, redirect to welcome
   useEffect(() => {
-    if ((global as any).__mockAuth !== true) {
+    if (!isAuthenticated) {
+      console.log('TabLayout: Usuario no autenticado, redirigiendo a welcome');
       router.replace('/welcome');
+    } else {
+      console.log('TabLayout: Usuario autenticado, manteniéndose en tabs');
     }
-  });
+  }, [isAuthenticated]);
 
   return (
     <Tabs

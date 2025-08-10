@@ -73,13 +73,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = useCallback(async (email: string, _password: string) => {
+    console.log('AuthContext: signIn llamado con email:', email);
     // TODO: Replace with real API call
     const fakeToken = 'demo-token';
     const fakeUser: AuthUser = { id: '1', email };
+    
+    // Actualizar el estado primero
     setToken(fakeToken);
     setUser(fakeUser);
+    
+    // Luego guardar en storage
     await saveSecureItem(TOKEN_KEY, fakeToken);
     await saveSecureItem(USER_KEY, JSON.stringify(fakeUser));
+    
+    console.log('AuthContext: Usuario autenticado correctamente, isAuthenticated será:', Boolean(fakeToken));
   }, []);
 
   const signUp = useCallback(async (email: string, password: string) => {
