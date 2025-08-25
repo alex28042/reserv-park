@@ -7,12 +7,15 @@ import { ActivityIndicator, View } from 'react-native';
 import 'react-native-reanimated';
 
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { LiveActivityProvider } from '@/contexts/LiveActivityContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <RootLayoutNav />
+      <LiveActivityProvider>
+        <RootLayoutNav />
+      </LiveActivityProvider>
     </AuthProvider>
   );
 }

@@ -2,6 +2,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { LiveActivityManager } from '@/modules/LiveActivityManager';
 import { indexStyles as styles } from '@/styles/index.styles';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
@@ -12,6 +13,9 @@ export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const [activeTab, setActiveTab] = useState('buscar');
+  const [liveActivityId, setLiveActivityId] = useState<string | null>(null);
+  const [isTestingLiveActivity, setIsTestingLiveActivity] = useState(false);
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
 
   const handleFeaturePress = (feature: string) => {
     // Navegación específica para búsqueda y ubicaciones
@@ -37,6 +41,49 @@ export default function HomeScreen() {
   const handleLocationPress = (location: string) => {
     // Navegar a explore cuando se toque una ubicación favorita
     router.push('/(tabs)/explore');
+  };
+
+  const handleTestLiveActivity = async () => {
+    if (liveActivityId) {
+      // Si ya hay una actividad activa, la detenemos
+      setIsTestingLiveActivity(true);
+      try {
+        const result = await LiveActivityManager.stop(liveActivityId);
+        if (result.isSuccess) {
+          setLiveActivityId(null);
+          Alert.alert('Éxito', 'Live Activity detenida correctamente');
+        } else {
+          Alert.alert('Error', result.message || 'No se pudo detener la Live Activity');
+        }
+      } catch (error) {
+        Alert.alert('Error', 'Error al detener Live Activity: ' + String(error));
+      } finally {
+        setIsTestingLiveActivity(false);
+      }
+    } else {
+      // Iniciamos una nueva Live Activity
+      setIsTestingLiveActivity(true);
+      try {
+        const testData = {
+          location: 'Gran Vía, 123 - Madrid',
+          timeRemaining: '2h 15m',
+          status: 'Activo',
+          reservationId: 'test-' + Date.now(),
+        };
+        
+        const result = await LiveActivityManager.start(testData);
+        if (result.isSuccess && result.id) {
+          setLiveActivityId(result.id);
+          Alert.alert('Éxito', 'Live Activity iniciada correctamente');
+        } else {
+          Alert.alert('Error', result.message || 'No se pudo iniciar la Live Activity');
+        }
+      } catch (error) {
+        Alert.alert('Error', 'Error al iniciar Live Activity: ' + String(error));
+      } finally {
+        setIsTestingLiveActivity(false);
+      }
+    }
   };
 
   return (
@@ -214,6 +261,50 @@ export default function HomeScreen() {
             </View>
           </View>
 
+          {/* Live Activity Test Button */}
+          <View style={{ marginBottom: 24 }}>
+            <TouchableOpacity 
+              style={[
+                styles.ctaBanner, 
+                { 
+                  backgroundColor: liveActivityId ? colors.warning : colors.success,
+                  opacity: isTestingLiveActivity ? 0.6 : 1 
+                }
+              ]}
+              onPress={handleTestLiveActivity}
+              disabled={isTestingLiveActivity}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                <IconSymbol 
+                  name={liveActivityId ? "stop.circle.fill" : "play.circle.fill"} 
+                  size={24} 
+                  color={colors.background} 
+                />
+                <ThemedText style={[styles.ctaTitle, { color: colors.background, marginLeft: 8 }]}>
+                  {isTestingLiveActivity 
+                    ? 'Procesando...' 
+                    : liveActivityId 
+                      ? 'Detener Live Activity' 
+                      : 'Test Live Activity'
+                  }
+                </ThemedText>
+              </View>
+              <ThemedText style={[styles.ctaSubtitle, { color: colors.background }]}>
+                {liveActivityId 
+                  ? 'Toca para detener la actividad en vivo actual' 
+                  : 'Toca para probar la funcionalidad de Live Activity'
+                }
+              </ThemedText>
+              {liveActivityId && (
+                <View style={[styles.ctaAction, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
+                  <ThemedText style={{ color: colors.background, fontWeight: '700' }}>
+                    ID: {liveActivityId.substring(0, 8)}...
+                  </ThemedText>
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
+
           {/* Nearby horizontal list */}
           <View style={{ marginBottom: 24 }}>
             <View style={styles.sectionHeaderRow}>
@@ -365,8 +456,29 @@ export default function HomeScreen() {
               />
             </View>
           </View>
+          
+          {/* Live Activity Test Section */}
+          <View style={styles.testSection}>
+            <TouchableOpacity
+              style={[
+                styles.testButton,
+                { backgroundColor: colors.primary, borderColor: colors.primary }
+              ]}
+              onPress={() => setShowDebugPanel(!showDebugPanel)}
+            >
+              <IconSymbol name="ladybug.fill" size={20} color={colors.accent} />
+              <ThemedText style={[styles.testButtonText, { color: colors.accent }]} type="defaultSemiBold">
+                🧪 Test Live Activity
+              </ThemedText>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
+      
+      {/* Debug Panel Overlay */}
+      {showDebugPanel && (
+        <LiveActivityDebugPanel onClose={() => setShowDebugPanel(false)} />
+      )}
     </SafeAreaView>
   );
 }

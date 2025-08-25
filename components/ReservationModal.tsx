@@ -1,16 +1,17 @@
 import { Colors } from '@/constants/Colors';
+import { useLiveActivity } from '@/contexts/LiveActivityContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useLocation } from '@/hooks/useLocation';
 import React, { useState } from 'react';
 import {
-    Alert,
-    Linking,
-    Modal,
-    Platform,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View
+  Alert,
+  Linking,
+  Modal,
+  Platform,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { reservationModalStyles as styles } from './ReservationModal.styles';
@@ -53,6 +54,7 @@ export function ReservationModal({ visible, spot, onClose, onNavigate }: Reserva
   const [selectedDuration, setSelectedDuration] = useState(timeOptions[1]); // Default: 1 hora
   const [paymentMethod, setPaymentMethod] = useState('card');
   const { location } = useLocation();
+  const { actions: liveActivityActions } = useLiveActivity();
 
   if (!spot) return null;
 
@@ -60,6 +62,42 @@ export function ReservationModal({ visible, spot, onClose, onNavigate }: Reserva
     setCurrentStep('details');
     setSelectedDuration(timeOptions[1]);
     setPaymentMethod('card');
+  };
+
+  const confirmReservation = async () => {
+    try {
+      const now = new Date();
+      const endTimeDate = new Date(now.getTime() + selectedDuration.multiplier * 60 * 60 * 1000);
+      const hours = Math.floor(selectedDuration.multiplier);
+      const minutes = Math.floor((selectedDuration.multiplier % 1) * 60);
+      const timeRemaining = hours > 0 
+        ? `${hours}h${minutes > 0 ? ` ${minutes}m` : ''}` 
+        : `${minutes}m`;
+      
+      const reservationData = {
+        location: spot.address,
+        timeRemaining: timeRemaining,
+        status: 'Activo',
+        endTime: endTimeDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+        canExtend: true,
+        totalDurationMinutes: Math.round(selectedDuration.multiplier * 60),
+        reservationId: `res-${spot.id}-${Date.now()}`,
+      };
+
+      const result = await liveActivityActions.startLiveActivity(reservationData);
+      
+      if (result.success) {
+        setCurrentStep('success');
+      } else {
+        // Si falla el Live Activity, continuar con la reserva normal
+        console.warn('Live Activity failed to start:', result.message);
+        setCurrentStep('success');
+      }
+    } catch (error) {
+      console.error('Error starting Live Activity:', error);
+      // Continuar con la reserva normal incluso si falla el Live Activity
+      setCurrentStep('success');
+    }
   };
 
   const handleClose = () => {
@@ -417,7 +455,7 @@ export function ReservationModal({ visible, spot, onClose, onNavigate }: Reserva
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.primaryButton, { backgroundColor: colors.primary }]}
-          onPress={() => setCurrentStep('success')}
+          onPress={confirmReservation}
         >
           <ThemedText style={[styles.buttonText, { color: colors.accent }]} type="defaultSemiBold">
             Confirmar Reserva

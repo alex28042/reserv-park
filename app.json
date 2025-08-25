@@ -10,10 +10,16 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
+      "appleTeamId": "GGVSU9B6B2",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "ReservPark necesita acceso a tu ubicación para encontrar plazas de aparcamiento cercanas.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "ReservPark necesita acceso a tu ubicación para funciones de navegación y reservas."
-      }
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "ReservPark necesita acceso a tu ubicación para funciones de navegación y reservas.",
+        "NSSupportsLiveActivities": true
+      },
+      "entitlements": {
+        "com.apple.security.application-groups": ["group.com.reservpark.app"]
+      },
+      "bundleIdentifier": "com.alexaloonsoodev.reservpark"
     },
     "android": {
       "adaptiveIcon": {
@@ -45,7 +51,8 @@
           "backgroundColor": "#003346"
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "@bacons/apple-targets"
     ],
     "splash": {
       "image": "./assets/images/reservpark-logo.jpeg",
@@ -56,9 +63,28 @@
       "typedRoutes": true
     },
     "extra": {
-      "router": { "preserveState": false },
+      "router": {
+        "preserveState": false
+      },
       "eas": {
-        "projectId": "9f94bb22-42b9-4ecd-ad58-a5ad9a1c9ce1"
+        "projectId": "9f94bb22-42b9-4ecd-ad58-a5ad9a1c9ce1",
+        "build": {
+          "experimental": {
+            "ios": {
+              "appExtensions": [
+                {
+                  "bundleIdentifier": "undefined.widget",
+                  "targetName": "widget",
+                  "entitlements": {
+                    "com.apple.security.application-groups": [
+                      "group.com.reservpark.app"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        }
       }
     }
   }

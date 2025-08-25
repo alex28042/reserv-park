@@ -440,6 +440,35 @@ export const indexStyles = StyleSheet.create({
     fontSize: 12,
     opacity: 0.6,
   },
+  
+  // Test section styles
+  testSection: {
+    marginTop: 20,
+    marginBottom: 40,
+    paddingHorizontal: 20,
+  },
+  testButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 16,
+    borderWidth: 2,
+    gap: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  testButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
 });
 
 
